@@ -2,57 +2,67 @@
 <html lang="en">
 
 <head>
-
   <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>Index - Selecao Bootstrap Template</title>
   <meta name="description" content="">
-  <meta name="author" content="">
+  <meta name="keywords" content="">
 
-  <title>SB Admin 2 - Dashboard</title>
+  <!-- Favicons -->
+  <link href="/assets2/img/favicon.png" rel="icon">
+  <link href="/assets2/img/apple-touch-icon.png" rel="apple-touch-icon">
 
-  <!-- Custom fonts for this template-->
-  <link href="/assets2/vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com" rel="preconnect">
+  <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
   <link
-    href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i"
+    href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Raleway:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
     rel="stylesheet">
 
-  <!-- Custom styles for this template-->
-  <link href="/assets2/css/sb-admin-2.min.css" rel="stylesheet">
+  <!-- Vendor CSS Files -->
+  <link href="/assets2/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="/assets2/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
+  <link href="/assets2/vendor/aos/aos.css" rel="stylesheet">
+  <link href="/assets2/vendor/animate.css/animate.min.css" rel="stylesheet">
+  <link href="/assets2/vendor/glightbox/css/glightbox.min.css" rel="stylesheet">
+  <link href="/assets2/vendor/swiper/swiper-bundle.min.css" rel="stylesheet">
 
+  <!-- Main CSS File -->
+  <link href="/assets2/css/main.css" rel="stylesheet">
+
+  <!-- =======================================================
+  * Template Name: Selecao
+  * Template URL: https://bootstrapmade.com/selecao-bootstrap-template/
+  * Updated: Aug 07 2024 with Bootstrap v5.3.3
+  * Author: BootstrapMade.com
+  * License: https://bootstrapmade.com/license/
+  ======================================================== -->
 </head>
 
-<body id="page-top">
-  <div id="wrapper">
+<body class="index-page">
 
-    {{#if teacher}}
-    {{>teacher-header}}
-    {{else if admin}}
-    {{>admin-header}}
-    {{else}}
-    {{>user-header}}
-    {{/if}}
+  {{#if teacher}}
+  {{>teacher-header}}
+  {{else if admin}}
+  {{>admin-header}}
+  {{else}}
+  {{>user-header}}
+  {{/if}}
 
 
-    {{{body}}}
+  {{{body}}}
 
-  </div>
-  <!-- Bootstrap core JavaScript-->
-  <script src="/assets2/vendor/jquery/jquery.min.js"></script>
+  <!-- Vendor JS Files -->
   <script src="/assets2/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <script src="/assets2/vendor/php-email-form/validate.js"></script>
+  <script src="/assets2/vendor/aos/aos.js"></script>
+  <script src="/assets2/vendor/glightbox/js/glightbox.min.js"></script>
+  <script src="/assets2/vendor/imagesloaded/imagesloaded.pkgd.min.js"></script>
+  <script src="/assets2/vendor/isotope-layout/isotope.pkgd.min.js"></script>
+  <script src="/assets2/vendor/swiper/swiper-bundle.min.js"></script>
 
-  <!-- Core plugin JavaScript-->
-  <script src="/assets2/vendor/jquery-easing/jquery.easing.min.js"></script>
-
-  <!-- Custom scripts for all pages-->
-  <script src="/assets2/js/sb-admin-2.min.js"></script>
-
-  <!-- Page level plugins -->
-  <script src="/assets2/vendor/chart.js/Chart.min.js"></script>
-
-  <!-- Page level custom scripts -->
-  <script src="/assets2/js/demo/chart-area-demo.js"></script>
-  <script src="/assets2/js/demo/chart-pie-demo.js"></script>
+  <!-- Main JS File -->
+  <script src="/assets2/js/main.js"></script>
 
 </body>
 

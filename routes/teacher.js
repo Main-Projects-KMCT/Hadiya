@@ -21,7 +21,7 @@ const verifySignedIn = (req, res, next) => {
 /* GET admins listing. */
 router.get("/", verifySignedIn, function (req, res, next) {
   let teacher = req.session.teacher;
-  res.render("teacher/home", { teacher: true, layout: "layout", teacher });
+  res.render("teacher/home", { teacher: true, layout: "teacher", teacher });
 });
 
 
@@ -35,13 +35,13 @@ router.get("/all-notifications", verifySignedIn, async function (req, res) {
   // Pass teacherId to getAllOrders
   let orders = await teacherHelper.getAllOrders(teacherId);
   let notifications = await teacherHelper.getAllnotifications(teacherId)
-  res.render("teacher/all-notifications", { teacher: true, layout: "layout", notifications, teacher, orders });
+  res.render("teacher/all-notifications", { teacher: true, layout: "teacher", notifications, teacher, orders });
 });
 
 ///////ADD notification/////////////////////                                         
 router.get("/add-notification", verifySignedIn, function (req, res) {
   let teacher = req.session.teacher;
-  res.render("teacher/all-notifications", { teacher: true, layout: "layout", teacher });
+  res.render("teacher/all-notifications", { teacher: true, layout: "teacher", teacher });
 });
 
 ///////ADD notification/////////////////////                                         
@@ -64,7 +64,7 @@ router.get("/edit-notification/:id", verifySignedIn, async function (req, res) {
   let notificationId = req.params.id;
   let notification = await teacherHelper.getnotificationDetails(notificationId);
   console.log(notification);
-  res.render("teacher/edit-notification", { teacher: true, layout: "layout", notification, teacher });
+  res.render("teacher/edit-notification", { teacher: true, layout: "teacher", notification, teacher });
 });
 
 ///////EDIT notification/////////////////////                                         
@@ -100,7 +100,7 @@ router.get("/delete-all-notifications", verifySignedIn, function (req, res) {
 ////////////////////PROFILE////////////////////////////////////
 router.get("/profile", async function (req, res, next) {
   let teacher = req.session.teacher;
-  res.render("teacher/profile", { teacher: true, layout: "layout", teacher });
+  res.render("teacher/profile", { teacher: true, layout: "teacher", teacher });
 });
 
 
@@ -116,7 +116,7 @@ router.get("/profile", async function (req, res, next) {
 //     const workspace = await userHelper.getWorkspaceById(workspaceId);
 //     const feedbacks = await userHelper.getFeedbackByWorkspaceId(workspaceId); // Fetch feedbacks for the specific workspace
 //     console.log('feedbacks', feedbacks)
-//     res.render("teacher/all-feedbacks", { teacher: true, layout: "layout", workspace, feedbacks, teacher });
+//     res.render("teacher/all-feedbacks", { teacher: true, layout: "teacher", workspace, feedbacks, teacher });
 //   } catch (error) {
 //     console.error("Error fetching workspace:", error);
 //     res.status(500).send("Server Error");
@@ -162,14 +162,14 @@ router.get("/teacher-feedback", async function (req, res) {
 router.get("/all-workspaces", verifySignedIn, function (req, res) {
   let teacher = req.session.teacher;
   teacherHelper.getAllworkspaces(req.session.teacher._id).then((workspaces) => {
-    res.render("teacher/all-workspaces", { teacher: true, layout: "layout", workspaces, teacher });
+    res.render("teacher/all-workspaces", { teacher: true, layout: "teacher", workspaces, teacher });
   });
 });
 
 ///////ADD workspace/////////////////////                                         
 router.get("/add-workspace", verifySignedIn, function (req, res) {
   let teacher = req.session.teacher;
-  res.render("teacher/add-workspace", { teacher: true, layout: "layout", teacher });
+  res.render("teacher/add-workspace", { teacher: true, layout: "teacher", teacher });
 });
 
 ///////ADD workspace/////////////////////                                         
@@ -208,7 +208,7 @@ router.get("/edit-workspace/:id", verifySignedIn, async function (req, res) {
   let workspaceId = req.params.id;
   let workspace = await teacherHelper.getworkspaceDetails(workspaceId);
   console.log(workspace);
-  res.render("teacher/edit-workspace", { teacher: true, layout: "layout", workspace, teacher });
+  res.render("teacher/edit-workspace", { teacher: true, layout: "teacher", workspace, teacher });
 });
 
 ///////EDIT workspace/////////////////////                                         
@@ -253,7 +253,7 @@ router.get("/all-users", verifySignedIn, async function (req, res) {
 
   res.render("teacher/all-users", {
     teacher: true,
-    layout: "layout",
+    layout: "teacher",
     orders,
     teacher
   });
@@ -270,7 +270,7 @@ router.get("/all-transactions", verifySignedIn, async function (req, res) {
 
   res.render("teacher/all-transactions", {
     teacher: true,
-    layout: "layout",
+    layout: "teacher",
     orders,
     teacher
   });
@@ -448,7 +448,7 @@ router.get("/signout", function (req, res) {
 
 router.get("/add-product", verifySignedIn, function (req, res) {
   let teacher = req.session.teacher;
-  res.render("teacher/add-product", { teacher: true, layout: "layout", workspace });
+  res.render("teacher/add-product", { teacher: true, layout: "teacher", workspace });
 });
 
 router.post("/add-product", function (req, res) {
@@ -469,7 +469,7 @@ router.get("/edit-product/:id", verifySignedIn, async function (req, res) {
   let productId = req.params.id;
   let product = await teacherHelper.getProductDetails(productId);
   console.log(product);
-  res.render("teacher/edit-product", { teacher: true, layout: "layout", product, workspace });
+  res.render("teacher/edit-product", { teacher: true, layout: "teacher", product, workspace });
 });
 
 router.post("/edit-product/:id", verifySignedIn, function (req, res) {
@@ -502,7 +502,7 @@ router.get("/delete-all-products", verifySignedIn, function (req, res) {
 router.get("/all-users", verifySignedIn, function (req, res) {
   let teacher = req.session.teacher;
   teacherHelper.getAllUsers().then((users) => {
-    res.render("teacher/users/all-users", { teacher: true, layout: "layout", workspace, users });
+    res.render("teacher/users/all-users", { teacher: true, layout: "teacher", workspace, users });
   });
 });
 
@@ -530,7 +530,7 @@ router.get("/all-orders", verifySignedIn, async function (req, res) {
 
   res.render("teacher/all-orders", {
     teacher: true,
-    layout: "layout",
+    layout: "teacher",
     orders,
     teacher
   });
@@ -544,7 +544,7 @@ router.get(
     let orderId = req.params.id;
     let products = await userHelper.getOrderProducts(orderId);
     res.render("teacher/order-products", {
-      teacher: true, layout: "layout",
+      teacher: true, layout: "teacher",
       workspace,
       products,
     });
@@ -575,7 +575,7 @@ router.get("/cancel-all-orders", verifySignedIn, function (req, res) {
 router.post("/search", verifySignedIn, function (req, res) {
   let teacher = req.session.teacher;
   teacherHelper.searchProduct(req.body).then((response) => {
-    res.render("teacher/search-result", { teacher: true, layout: "layout", workspace, response });
+    res.render("teacher/search-result", { teacher: true, layout: "teacher", workspace, response });
   });
 });
 

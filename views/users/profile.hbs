@@ -3,6 +3,14 @@
         font-size: 13px;
         margin-bottom: 10px;
     }
+
+    .header {
+        background-color: black !important;
+    }
+
+    .login-wrapper {
+        margin-top: 100px;
+    }
 </style>
 <!-- Login Wrapper Area -->
 <div class="login-wrapper d-flex  align-items-center justify-content-center">
@@ -10,9 +18,9 @@
 
         <!-- Register Form -->
 
-        <div class="d-flex justify-content-between">
-            {{!-- <a href="/" class="btn btn-sm btn-dark">
-                <i class="bi bi-arrow-left-short "></i> Back</a> --}}
+        <div class="d-flex gap-3">
+            <a href="/" class="btn btn-sm btn-dark">
+                <i class="bi bi-arrow-left-short "></i> Back</a>
             {{#if user}}
             <a href="/edit-profile/{{user._id}}" class="btn btn-sm btn-primary">
                 <i class="bi bi-pen "></i> Edit Profile</a>
