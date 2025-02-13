@@ -85,6 +85,21 @@ module.exports = {
     });
   },
 
+
+  deletematerial: (materialId) => {
+    return new Promise((resolve, reject) => {
+      db.get()
+        .collection(collections.MATERIAL_COLLECTION)
+        .removeOne({
+          _id: objectId(materialId)
+        })
+        .then((response) => {
+          console.log(response);
+          resolve(response);
+        });
+    });
+  },
+
   ///////ADD teacher/////////////////////                                         
   addteacher: (teacher, callback) => {
     console.log(teacher);

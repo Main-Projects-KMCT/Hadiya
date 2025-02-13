@@ -393,6 +393,13 @@ router.post("/add-material", function (req, res) {
 });
 
 
+router.get("/delete-material/:id", verifySignedIn, function (req, res) {
+  let materialId = req.params.id;
+  adminHelper.deletematerial(materialId).then((response) => {
+    res.redirect("/teacher/all-materials");
+  });
+});
+
 ///////EDIT workspace/////////////////////                                         
 router.get("/edit-workspace/:id", verifySignedIn, async function (req, res) {
   let teacher = req.session.teacher;
