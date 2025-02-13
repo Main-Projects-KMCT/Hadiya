@@ -1,0 +1,170 @@
+<main id="main" class="main">
+
+    <div class="pagetitle">
+        <h1>Manage Timetable</h1>
+        <nav>
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/admin">Dashboard</a></li>
+                <li class="breadcrumb-item">Timetable</li>
+                <li class="breadcrumb-item active">All-Timetable</li>
+            </ol>
+        </nav>
+    </div><!-- End Page Title -->
+
+    <section class="section">
+        <div class="row">
+            <div class="col-lg-12">
+
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">All Timetable</h5>
+                        <button type="button" class="btn btn-primary mb-4" data-toggle="modal"
+                            data-target="#exampleModalCenter">
+                            + Add Timetable
+                        </button>
+                        <div class="table-responsive">
+                            <table class="table border table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th>Day</th>
+
+                                        <th>Period 1</th>
+                                        <th>Period 2</th>
+                                        <th>Period 3</th>
+                                        <th>Period 4</th>
+                                        <th>Period 5</th>
+                                        <th>Period 6</th>
+                                        <th>Manage</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {{#each timetables}}
+                                    <tr>
+                                        <td><b>{{this.day}}</b></td>
+
+                                        <td>{{this.teacher1}} </td>
+                                        <td>{{this.teacher2}}</td>
+                                        <td>{{this.teacher3}}</td>
+                                        <td>{{this.teacher4}}</td>
+                                        <td>{{this.teacher5}}</td>
+                                        <td>{{this.teacher6}}</td>
+
+                                        <td>
+                                            <div class="d-flex gap-2">
+
+                                                <form action="/admin/delete-timetable/{{this._id}}" method="POST">
+                                                    <button type="submit" class="btn btn-danger btn-sm"
+                                                        onclick="return confirm('Are You Sure to Delete {{this.sname}} ?')"><i
+                                                            class="bi bi-trash"></i></button>
+                                                </form>
+                                            </div>
+                                        </td>
+
+                                    </tr>
+                                    {{/each}}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+
+            </div>
+        </div>
+    </section>
+
+</main><!-- End #main -->
+
+
+<div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLongTitle">Add New Subject</h5>
+            </div>
+            <div class="modal-body">
+                <form action="/admin/timetables/add-timetable" method="post">
+                    <div class="col-md-12">
+                        <label for="inputName5" class="form-label">Select Day</label>
+                        <select class="form-control form-control" name="day">
+                            <option selected disabled> Select Day</option>
+                            <option value="Monday">Monday</option>
+                            <option value="Tuesday">Tuesday</option>
+                            <option value="Wednesday">Wednesday</option>
+                            <option value="Thursday">Thursday</option>
+                            <option value="Friday">Friday</option>
+                            <option value="Saturday">Saturday</option>
+                        </select>
+                    </div>
+
+                    <!-- Teacher Selection for each period -->
+                    <div class="col-md-12 mt-3">
+                        <label for="inputName5" class="form-label"><b>1st Period</b></label>
+                        <select class="form-control form-control" name="teacher1">
+                            <option selected disabled> Select Teacher</option>
+                            {{#each teachers}}
+                            <option value="{{this._id}}"> {{this.Name}}</option>
+                            {{/each}}
+                        </select>
+                    </div>
+
+                    <div class="col-md-12 mt-3">
+                        <label for="inputName5" class="form-label"><b>2nd Period</b></label>
+                        <select class="form-control form-control" name="teacher2">
+                            <option selected disabled> Select Teacher</option>
+                            {{#each teachers}}
+                            <option value="{{this._id}}"> {{this.Name}}</option>
+                            {{/each}}
+                        </select>
+                    </div>
+
+                    <div class="col-md-12 mt-3">
+                        <label for="inputName5" class="form-label"><b>3rd Period</b></label>
+                        <select class="form-control form-control" name="teacher3">
+                            <option selected disabled> Select Teacher</option>
+                            {{#each teachers}}
+                            <option value="{{this._id}}"> {{this.Name}}</option>
+                            {{/each}}
+                        </select>
+                    </div>
+
+                    <div class="col-md-12 mt-3">
+                        <label for="inputName5" class="form-label"><b>4th Period</b></label>
+                        <select class="form-control form-control" name="teacher4">
+                            <option selected disabled> Select Teacher</option>
+                            {{#each teachers}}
+                            <option value="{{this._id}}"> {{this.Name}}</option>
+                            {{/each}}
+                        </select>
+                    </div>
+
+                    <div class="col-md-12 mt-3">
+                        <label for="inputName5" class="form-label"><b>5th Period</b></label>
+                        <select class="form-control form-control" name="teacher5">
+                            <option selected disabled> Select Teacher</option>
+                            {{#each teachers}}
+                            <option value="{{this._id}}"> {{this.Name}}</option>
+                            {{/each}}
+                        </select>
+                    </div>
+
+                    <div class="col-md-12 mt-3">
+                        <label for="inputName5" class="form-label"><b>6th Period</b></label>
+                        <select class="form-control form-control" name="teacher6">
+                            <option selected disabled> Select Teacher</option>
+                            {{#each teachers}}
+                            <option value="{{this._id}}"> {{this.Name}}</option>
+                            {{/each}}
+                        </select>
+                    </div>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="submit" class="btn btn-primary">Add</button>
+            </div>
+            </form>
+        </div>
+    </div>
+</div>

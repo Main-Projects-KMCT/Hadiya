@@ -22,7 +22,7 @@
             <div class="card shadow p-4">
 
                 <div class="register-form mt-4">
-                    <h6 class="mb-4 text-center">Hey User, Welcome<br> To Builder</h6>
+                    <h6 class="mb-4 text-center">Create New Account</h6>
                     {{#if signInErr}}
 
                     <p class="text-danger text-center ">{{signInErr}}</p>
@@ -32,9 +32,9 @@
                         <input type="hidden" name="date" id="datetime">
 
                         <div class="form-group">
-                            <input class="form-control" type="text" name="Companyname" value="{{Companyname}}"
-                                placeholder="Your Name" pattern="[A-Za-z\s]+" title="Only letters are allowed">
-                            {{#if errors.Companyname}}<div class="text-danger">{{errors.Companyname}}</div>{{/if}}
+                            <input class="form-control" type="text" name="Name" value="{{Name}}" placeholder="Your Name"
+                                pattern="[A-Za-z\s]+" title="Only letters are allowed">
+                            {{#if errors.Name}}<div class="text-danger">{{errors.Name}}</div>{{/if}}
                         </div>
 
                         <div class="form-group">

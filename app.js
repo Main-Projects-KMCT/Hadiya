@@ -71,11 +71,13 @@ db.connect((err) => {
   console.log("\x1b[38;2;144;238;144mYour Link : http://localhost:4005/ ✅ \x1b[0m");
 });
 app.use("/", usersRouter);
+app.use("/dashboard", usersRouter);
 app.use("/admin", adminRouter);
 app.use("/teacher", teacherRouter);
 app.use("/admin/users", adminRouter);
 app.use("/admin/teacher", adminRouter);
-
+app.use("/admin/subjects", adminRouter);
+app.use("/admin/timetables", adminRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

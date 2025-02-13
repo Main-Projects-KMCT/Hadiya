@@ -1,0 +1,84 @@
+<main class="main">
+    <style>
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            font-size: 13px;
+        }
+
+        td {
+            margin-bottom: 20px;
+        }
+    </style>
+    <div class="container">
+
+        <!-- Stats Section -->
+        <section id="stats" class="stats section">
+
+            <!-- Login Wrapper Area -->
+            <div class="container mb-4 mt-5">
+                <h6 class="mb-4 text-center">Attendance Marker</h6>
+
+                <!-- Register Form -->
+                {{!-- <h4 class="text-center text-white mb-3" style="font-weight: 600;">ET LAB TEACHERS PORTAL<span
+                        style="color: crimson;">.</span></h4> --}}
+
+                <div class="card shadow p-4">
+
+                    <form action="/teacher/attendance" method="POST" enctype="multipart/form-data" autocomplete="off">
+                        <input type="hidden" name="date" id="datetime">
+
+                        <div class="form-group">
+                            <label for="">Your Subject</label>
+                            <input class="form-control" type="text" name="subject"
+                                value="{{teacher.subjectDetails.sname}}">
+                            <input class="form-control" type="hidden" name="subjectId"
+                                value="{{teacher.subjectDetails._id}}">
+                            <input class="form-control" type="hidden" name="teacherId" value="{{teacher._id}}">
+                        </div>
+
+                        <p class="mb-0">Check the students if they are present</p>
+                        <hr class="mb-0">
+
+                        <table>
+                            <tbody>
+                                {{#each users}}
+                                <tr>
+                                    <td>
+                                        <!-- Checkbox for each user -->
+                                        <input type="checkbox" name="selectedUsers" value="{{this._id}}">
+                                    </td>
+                                    <td>{{this.Fname}} {{this.Lname}}</td>
+                                </tr> <br>
+                                {{/each}}
+                            </tbody>
+                        </table>
+
+                        <button class="btn btn-dark w-25 mt-5" type="submit">Mark Attendance</button>
+                    </form>
+                </div>
+                <!-- Login Meta -->
+
+            </div>
+
+
+        </section><!-- /Stats Section -->
+
+    </div>
+</main>
+<script>
+    // Get current date and time
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = (now.getMonth() + 1).toString().padStart(2, '0');
+    const day = now.getDate().toString().padStart(2, '0');
+    const hours = ((now.getHours() + 11) % 12 + 1).toString().padStart(2, '0'); // Convert to 12-hour format
+    const minutes = now.getMinutes().toString().padStart(2, '0');
+    const ampm = now.getHours() >= 12 ? 'PM' : 'AM';
+
+    // Set default value to current date and time in 12-hour format with AM/PM
+    const defaultDateTime = `${year}-${month}-${day}T${hours}:${minutes}`;
+    document.getElementById('datetime').value = defaultDateTime;
+</script>

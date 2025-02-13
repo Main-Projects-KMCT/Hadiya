@@ -1,0 +1,61 @@
+<main id="main" class="main">
+    <div class="container">
+        <div class="pagetitle">
+            <h1>Timetable</h1>
+
+        </div><!-- End Page Title -->
+
+        <section class="section">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table border table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th>Day</th>
+                                            <th>Period 1 </th>
+                                            <th>Period 2</th>
+                                            <th>Period 3</th>
+                                            <th>Period 4</th>
+                                            <th>Period 5</th>
+                                            <th>Period 6</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {{#each timetables}}
+                                        <tr>
+                                            <td><b>{{this.day}}</b></td>
+                                            <td
+                                                class="{{#if (eq this.teacher1 ../loggedTeacherName)}}text-success text-bold{{/if}}">
+
+                                                {{this.teacher1}}</td>
+                                            <td
+                                                class="{{#if (eq this.teacher2 ../loggedTeacherName)}}text-success text-bold{{/if}}">
+                                                {{this.teacher2}}</td>
+                                            <td
+                                                class="{{#if (eq this.teacher3 ../loggedTeacherName)}}text-success text-bold{{/if}}">
+                                                {{this.teacher3}}</td>
+                                            <td
+                                                class="{{#if (eq this.teacher4 ../loggedTeacherName)}}text-success text-bold{{/if}}">
+                                                {{this.teacher4}}</td>
+                                            <td
+                                                class="{{#if (eq this.teacher5 ../loggedTeacherName)}}text-success text-bold{{/if}}">
+                                                {{this.teacher5}}</td>
+                                            <td
+                                                class="{{#if (eq this.teacher6 ../loggedTeacherName)}}text-success text-bold{{/if}}">
+                                                {{this.teacher6}}</td>
+                                        </tr>
+                                        {{/each}}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </div>
+</main><!-- End #main -->

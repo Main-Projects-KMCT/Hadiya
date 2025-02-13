@@ -1,0 +1,114 @@
+<main id="main" class="main">
+
+    <div class="pagetitle">
+        <h1>Manage Subjects</h1>
+        <nav>
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/admin">Dashboard</a></li>
+                <li class="breadcrumb-item">Subject</li>
+                <li class="breadcrumb-item active">All-Subject</li>
+            </ol>
+        </nav>
+    </div><!-- End Page Title -->
+
+    <section class="section">
+        <div class="row">
+            <div class="col-lg-12">
+
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">All Subjects</h5>
+                        <button type="button" class="btn btn-primary mb-4" data-toggle="modal"
+                            data-target="#exampleModalCenter">
+                            + Add Subject
+                        </button>
+                        <div class="table-responsive">
+                            <table class="table datatable">
+                                <thead>
+                                    <tr>
+                                        <th>No.</th>
+
+                                        <th>Subject Name</th>
+                                        {{!-- <th>Subject Code</th> --}}
+                                        <th>Teacher</th>
+                                        <th>Manage</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {{#each subjects}}
+                                    <tr>
+                                        <td>{{incremented @index}}</td>
+
+                                        <td>{{this.sname}} </td>
+                                        {{!-- <td>{{this.scode}}</td> --}}
+                                        <td>{{this.teacher}}</td>
+
+                                        <td>
+                                            <div class="d-flex gap-2">
+
+                                                <form action="/admin/delete-subject/{{this._id}}" method="POST">
+                                                    <button type="submit" class="btn btn-danger btn-sm"
+                                                        onclick="return confirm('Are You Sure to Delete {{this.sname}} ?')"><i
+                                                            class="bi bi-trash"></i></button>
+                                                </form>
+                                            </div>
+                                        </td>
+
+                                    </tr>
+                                    {{/each}}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+
+            </div>
+        </div>
+    </section>
+
+</main><!-- End #main -->
+
+
+<div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLongTitle">Add New Subject</h5>
+
+            </div>
+            <div class="modal-body">
+                <form action="/admin/subjects/add-subject" method="post">
+                    <div class="col-md-12">
+                        <label for="inputName5" class="form-label">Subject Name</label>
+                        <input type="text" class="form-control" name="sname" id="inputName5" required>
+                    </div>
+                    {{!-- <div class="col-md-12">
+                        <label for="inputName5" class="form-label">Subject Code</label>
+                        <input type="text" class="form-control" name="scode" id="inputName5" required>
+                    </div> --}}
+
+                    <div class="col-md-12">
+                        <label for="inputName5" class="form-label">Select Teacher</label>
+                        <select class="form-control form-control" name="teacher">
+                            <option selected disabled> Select Teacher</option>
+                            {{#each teachers}}
+                            <option value="{{this._id}}"> {{this.Name}}</option>
+
+                            {{/each}}
+                        </select>
+                    </div>
+
+
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="submit" class="btn btn-primary">Add</button>
+            </div>
+            </form>
+
+        </div>
+    </div>
+</div>

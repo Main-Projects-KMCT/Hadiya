@@ -3,12 +3,13 @@ var teacherHelper = require("../helper/teacherHelper");
 var fs = require("fs");
 const userHelper = require("../helper/userHelper");
 const adminHelper = require("../helper/adminHelper");
-
+const path = require("path");
 var router = express.Router();
 var db = require("../config/connection");
 var collections = require("../config/collections");
 const ObjectId = require("mongodb").ObjectID;
 
+const objectId = require("mongodb").objectID;
 
 const verifySignedIn = (req, res, next) => {
   if (req.session.signedInTeacher) {
@@ -19,10 +20,181 @@ const verifySignedIn = (req, res, next) => {
 };
 
 /* GET admins listing. */
-router.get("/", verifySignedIn, function (req, res, next) {
-  let teacher = req.session.teacher;
-  res.render("teacher/home", { teacher: true, layout: "teacher", teacher });
+/* GET admins listing. */
+router.get("/", verifySignedIn, async function (req, res, next) {
+  let teacher = req.session.teacher; // ✅ Get the logged-in teacher's session data
+
+  if (!teacher) {
+    return res.redirect("/teacher/signin"); // ✅ Redirect if no teacher session exists
+  }
+
+  try {
+    // ✅ Fetch teacher details along with the subject details using `$lookup`
+    let teacherDetails = await db.get()
+      .collection(collections.TEACHER_COLLECTION)
+      .aggregate([
+        {
+          $match: { _id: new ObjectId(teacher._id) } // ✅ Match the logged-in teacher
+        },
+        {
+          $lookup: {
+            from: collections.SUBJECT_COLLECTION, // ✅ Join with SUBJECT_COLLECTION
+            localField: "subject", // ✅ Match teacher's `subject` field
+            foreignField: "_id", // ✅ Match `_id` from SUBJECT_COLLECTION
+            as: "subjectDetails" // ✅ Store result as `subjectDetails`
+          }
+        },
+        {
+          $unwind: {
+            path: "$subjectDetails", // ✅ Extract subject details (if exists)
+            preserveNullAndEmptyArrays: true // ✅ Allow teachers with no subjects
+          }
+        }
+      ])
+      .toArray();
+
+    if (teacherDetails.length > 0) {
+      teacher = teacherDetails[0]; // ✅ Set the full teacher details
+    }
+
+    res.render("teacher/home", { teacher: true, layout: "teacher", teacher });
+  } catch (error) {
+    console.error("Error fetching teacher details:", error);
+    res.redirect("/login");
+  }
 });
+
+
+///////ALL timetables/////////////////////                                         
+router.get("/timetables", verifySignedIn, async function (req, res) {
+  let teacher = req.session.teacher; // Ensure session contains teacher details
+  let timetables = await adminHelper.getAllTimetables();
+  let teachers = await adminHelper.getAllteachers();
+  try {
+
+    // ✅ Fetch teacher details along with the subject details using `$lookup`
+    let teacherDetails = await db.get()
+      .collection(collections.TEACHER_COLLECTION)
+      .aggregate([
+        {
+          $match: { _id: new ObjectId(teacher._id) } // ✅ Match the logged-in teacher
+        },
+        {
+          $lookup: {
+            from: collections.SUBJECT_COLLECTION, // ✅ Join with SUBJECT_COLLECTION
+            localField: "subject", // ✅ Match teacher's `subject` field
+            foreignField: "_id", // ✅ Match `_id` from SUBJECT_COLLECTION
+            as: "subjectDetails" // ✅ Store result as `subjectDetails`
+          }
+        },
+        {
+          $unwind: {
+            path: "$subjectDetails", // ✅ Extract subject details (if exists)
+            preserveNullAndEmptyArrays: true // ✅ Allow teachers with no subjects
+          }
+        }
+      ])
+      .toArray();
+
+    if (teacherDetails.length > 0) {
+      teacher = teacherDetails[0]; // ✅ Set the full teacher details
+    }
+
+    // ✅ Fetch all users (you can add a helper for this if it's not already present)
+    let users = await db.get()
+      .collection(collections.USERS_COLLECTION) // Assuming the collection name is USER_COLLECTION
+      .find() // Get all users
+      .toArray();
+
+    res.render("teacher/timetables", {
+      teacher: true, teacher, users,
+      layout: "teacher",
+      timetables,
+      teachers,
+      loggedTeacherName: teacher ? teacher.Name : null,
+    });
+  } catch (error) {
+    console.error("Error fetching teacher details:", error);
+    res.redirect("/login");
+  }
+
+});
+
+
+
+//////ALL attendance/////////////////////                                         
+router.get("/attendance", verifySignedIn, async function (req, res) {
+  let teacher = req.session.teacher;
+  try {
+    // ✅ Fetch teacher details along with the subject details using `$lookup`
+    let teacherDetails = await db.get()
+      .collection(collections.TEACHER_COLLECTION)
+      .aggregate([
+        {
+          $match: { _id: new ObjectId(teacher._id) } // ✅ Match the logged-in teacher
+        },
+        {
+          $lookup: {
+            from: collections.SUBJECT_COLLECTION, // ✅ Join with SUBJECT_COLLECTION
+            localField: "subject", // ✅ Match teacher's `subject` field
+            foreignField: "_id", // ✅ Match `_id` from SUBJECT_COLLECTION
+            as: "subjectDetails" // ✅ Store result as `subjectDetails`
+          }
+        },
+        {
+          $unwind: {
+            path: "$subjectDetails", // ✅ Extract subject details (if exists)
+            preserveNullAndEmptyArrays: true // ✅ Allow teachers with no subjects
+          }
+        }
+      ])
+      .toArray();
+
+    if (teacherDetails.length > 0) {
+      teacher = teacherDetails[0]; // ✅ Set the full teacher details
+    }
+
+    // ✅ Fetch all users (you can add a helper for this if it's not already present)
+    let users = await db.get()
+      .collection(collections.USERS_COLLECTION) // Assuming the collection name is USER_COLLECTION
+      .find() // Get all users
+      .toArray();
+
+    res.render("teacher/attendance", { teacher: true, layout: "teacher", teacher, users });
+  } catch (error) {
+    console.error("Error fetching teacher details:", error);
+    res.redirect("/signin");
+  }
+});
+
+
+
+///////ADD notification/////////////////////                                         
+router.post("/attendance", function (req, res) {
+  console.log(req.body); // Log the entire request body for debugging
+
+  const attendance = {
+    date: req.body.date,
+    teacherId: req.body.teacherId,
+    subjectId: req.body.subjectId,
+    subject: req.body.subject,
+    selectedUsers: req.body.selectedUsers || [], // Ensure this defaults to an empty array if no users selected
+  };
+
+  teacherHelper.addattendance(attendance, (id) => {
+    if (id) {
+      res.redirect("/teacher");
+    } else {
+      res.status(500).send("Error adding attendance");
+    }
+  });
+});
+
+
+
+
+
+
 
 
 ///////ALL notification/////////////////////                                         
@@ -158,45 +330,64 @@ router.get("/teacher-feedback", async function (req, res) {
 
 
 
-///////ALL workspace/////////////////////                                         
-router.get("/all-workspaces", verifySignedIn, function (req, res) {
+///////ALL material/////////////////////                                         
+router.get("/all-materials", verifySignedIn, function (req, res) {
   let teacher = req.session.teacher;
-  teacherHelper.getAllworkspaces(req.session.teacher._id).then((workspaces) => {
-    res.render("teacher/all-workspaces", { teacher: true, layout: "teacher", workspaces, teacher });
+  teacherHelper.getAllmaterials(req.session.teacher._id).then((materials) => {
+    res.render("teacher/all-materials", { teacher: true, layout: "teacher", materials, teacher });
   });
 });
 
 ///////ADD workspace/////////////////////                                         
-router.get("/add-workspace", verifySignedIn, function (req, res) {
+router.get("/add-material", verifySignedIn, function (req, res) {
   let teacher = req.session.teacher;
-  res.render("teacher/add-workspace", { teacher: true, layout: "teacher", teacher });
+  res.render("teacher/add-material", { teacher: true, layout: "teacher", teacher });
 });
 
-///////ADD workspace/////////////////////                                         
-router.post("/add-workspace", function (req, res) {
-  // Ensure the teacher is signed in and their ID is available
+///////ADD material/////////////////////                                         
+router.post("/add-material", function (req, res) {
   if (req.session.signedInTeacher && req.session.teacher && req.session.teacher._id) {
-    const teacherId = req.session.teacher._id; // Get the teacher's ID from the session
+    const teacherId = req.session.teacher._id;
 
-    // Pass the teacherId to the addworkspace function
-    teacherHelper.addworkspace(req.body, teacherId, (workspaceId, error) => {
+    teacherHelper.addmaterial(req.body, teacherId, (materialId, error) => {
       if (error) {
-        console.log("Error adding workspace:", error);
-        res.status(500).send("Failed to add workspace");
-      } else {
-        let image = req.files.Image;
-        image.mv("./public/images/workspace-images/" + workspaceId + ".png", (err) => {
-          if (!err) {
-            res.redirect("/teacher/all-workspaces");
-          } else {
-            console.log("Error saving workspace image:", err);
-            res.status(500).send("Failed to save workspace image");
-          }
-        });
+        console.log("Error adding material:", error);
+        return res.status(500).send("Failed to add material");
       }
+
+      let fileFields = ["File1", "File2", "File3", "File4", "File5"]; // File input names from the form
+      let uploadPromises = [];
+
+      fileFields.forEach((field, index) => {
+        if (req.files && req.files[field]) { // Check if the file exists
+          let file = req.files[field];
+          let filename = `${materialId}-${index + 1}.pdf`;
+          let uploadPath = path.join(__dirname, "../public/images/materials/", filename);
+
+          let uploadPromise = new Promise((resolve, reject) => {
+            file.mv(uploadPath, (err) => {
+              if (err) {
+                console.log(`Error saving ${filename}:`, err);
+                reject(err);
+              } else {
+                resolve();
+              }
+            });
+          });
+
+          uploadPromises.push(uploadPromise);
+        }
+      });
+
+      Promise.all(uploadPromises)
+        .then(() => {
+          res.redirect("/teacher/all-materials");
+        })
+        .catch((err) => {
+          res.status(500).send("Failed to save materials");
+        });
     });
   } else {
-    // If the teacher is not signed in, redirect to the sign-in page
     res.redirect("/teacher/signin");
   }
 });
@@ -299,11 +490,11 @@ router.get("/signup", function (req, res) {
 });
 
 router.post("/signup", async function (req, res) {
-  const { Companyname, Email, Phone, Address, City, Pincode, Password } = req.body;
+  const { Name, Email, Phone, Address, City, Pincode, Password } = req.body;
   let errors = {};
 
   // Field validations
-  if (!Companyname) errors.Companyname = "Please enter your company name.";
+  if (!Name) errors.name = "Please enter your company name.";
   if (!Email) errors.email = "Please enter your email.";
   if (!Phone) errors.phone = "Please enter your phone number.";
   if (!Address) errors.address = "Please enter your address.";
@@ -317,10 +508,10 @@ router.post("/signup", async function (req, res) {
     .findOne({ Email });
   if (existingEmail) errors.email = "This email is already registered.";
 
-  const existingCompanyname = await db.get()
+  const existingName = await db.get()
     .collection(collections.TEACHER_COLLECTION)
-    .findOne({ Companyname });
-  if (existingCompanyname) errors.Companyname = "This company name is already registered.";
+    .findOne({ Name });
+  if (existingName) errors.Name = "This company name is already registered.";
 
   // Validate Pincode and Phone
   if (!/^\d{6}$/.test(Pincode)) errors.pincode = "Pincode must be exactly 6 digits.";
@@ -336,7 +527,7 @@ router.post("/signup", async function (req, res) {
       teacher: true,
       layout: 'empty',
       errors,
-      Companyname,
+      Name,
       Email,
       Phone,
       Address,

@@ -472,4 +472,280 @@ module.exports = {
 
     });
   },
+
+  /////////////////////////////////////////////////
+
+  ///////GET ALL subject/////////////////////                                            
+  getAllSubjects: () => {
+    return new Promise(async (resolve, reject) => {
+      try {
+        let subjects = await db
+          .get()
+          .collection(collections.SUBJECT_COLLECTION)
+          .aggregate([
+            {
+              $lookup: {
+                from: collections.TEACHER_COLLECTION, // ✅ Correct teachers collection name
+                localField: "teacher", // ✅ Field in SUBJECT_COLLECTION (Assuming teacher ID is stored here)
+                foreignField: "_id", // ✅ Matching field in TEACHER_COLLECTION (ObjectId)
+                as: "teacherInfo", // ✅ Output array field
+              },
+            },
+            {
+              $unwind: {
+                path: "$teacherInfo",
+                preserveNullAndEmptyArrays: true, // ✅ Keeps subjects without assigned teachers
+              },
+            },
+            {
+              $project: {
+                _id: 1, // ✅ Keep subject ID
+                sname: 1, // ✅ Keep subject name
+                scode: 1, // ✅ Add any other subject details
+                teacher: "$teacherInfo.Name", // ✅ Replace teacher ID with name
+              },
+            },
+          ])
+          .toArray();
+        resolve(subjects);
+      } catch (error) {
+        reject(error);
+      }
+    });
+  },
+
+  ///////ADD subject/////////////////////                                         
+  addSubject: (subject, callback) => {
+    console.log(subject);
+
+    // Convert teacher ID to ObjectId
+    if (subject.teacher) {
+      subject.teacher = new ObjectId(subject.teacher);
+    }
+
+    db.get()
+      .collection(collections.SUBJECT_COLLECTION)
+      .insertOne(subject)
+      .then((data) => {
+        console.log("Subject added:", data);
+
+        const subjectId = data.insertedId; // ✅ Get the inserted subject ID
+
+        // ✅ Update the teacher document with the latest subject (replace previous one)
+        if (subject.teacher) {
+          db.get()
+            .collection(collections.TEACHER_COLLECTION)
+            .updateOne(
+              { _id: subject.teacher }, // ✅ Find teacher by ID
+              { $set: { subject: subjectId } } // ✅ Replace the `subject` field
+            )
+            .then(() => {
+              console.log(`Subject ID ${subjectId} set for Teacher ID ${subject.teacher}`);
+            })
+            .catch((err) => console.error("Error updating teacher:", err));
+        }
+
+        callback(subjectId);
+      })
+      .catch((err) => console.error("Error inserting subject:", err));
+  },
+
+
+
+  ///////GET ALL timetable/////////////////////                                            
+  getAllTimetables: () => {
+    return new Promise(async (resolve, reject) => {
+      try {
+        let timetables = await db
+          .get()
+          .collection(collections.TIMETABLE_COLLECTION)
+          .aggregate([
+            {
+              $lookup: {
+                from: collections.TEACHER_COLLECTION,
+                localField: "teacher1", // Matching teacher1 field
+                foreignField: "_id",
+                as: "teacherInfo1", // Teacher info for teacher1
+              },
+            },
+            {
+              $lookup: {
+                from: collections.TEACHER_COLLECTION,
+                localField: "teacher2", // Matching teacher2 field
+                foreignField: "_id",
+                as: "teacherInfo2", // Teacher info for teacher2
+              },
+            },
+            {
+              $lookup: {
+                from: collections.TEACHER_COLLECTION,
+                localField: "teacher3", // Matching teacher3 field
+                foreignField: "_id",
+                as: "teacherInfo3", // Teacher info for teacher3
+              },
+            },
+            {
+              $lookup: {
+                from: collections.TEACHER_COLLECTION,
+                localField: "teacher4", // Matching teacher4 field
+                foreignField: "_id",
+                as: "teacherInfo4", // Teacher info for teacher4
+              },
+            },
+            {
+              $lookup: {
+                from: collections.TEACHER_COLLECTION,
+                localField: "teacher5", // Matching teacher5 field
+                foreignField: "_id",
+                as: "teacherInfo5", // Teacher info for teacher5
+              },
+            },
+            {
+              $lookup: {
+                from: collections.TEACHER_COLLECTION,
+                localField: "teacher6", // Matching teacher6 field
+                foreignField: "_id",
+                as: "teacherInfo6", // Teacher info for teacher6
+              },
+            },
+            {
+              $project: {
+                _id: 1,
+                sname: 1,
+                scode: 1,
+                day: 1,
+                teacher1: { $arrayElemAt: ["$teacherInfo1.Name", 0] }, // Get teacher1's name
+                teacher2: { $arrayElemAt: ["$teacherInfo2.Name", 0] }, // Get teacher2's name
+                teacher3: { $arrayElemAt: ["$teacherInfo3.Name", 0] }, // Get teacher3's name
+                teacher4: { $arrayElemAt: ["$teacherInfo4.Name", 0] }, // Get teacher4's name
+                teacher5: { $arrayElemAt: ["$teacherInfo5.Name", 0] }, // Get teacher5's name
+                teacher6: { $arrayElemAt: ["$teacherInfo6.Name", 0] }, // Get teacher6's name
+              },
+            },
+          ])
+          .toArray();
+
+        resolve(timetables);
+      } catch (error) {
+        reject(error);
+      }
+    });
+  },
+
+
+  ///////ADD timetable/////////////////////                                         
+  addTimetable: (timetable, callback) => {
+    console.log(timetable);
+
+    // Convert teacher IDs to ObjectId
+    for (let i = 1; i <= 6; i++) {
+      if (timetable[`teacher${i}`]) {
+        timetable[`teacher${i}`] = new ObjectId(timetable[`teacher${i}`]);
+      }
+    }
+
+    db.get()
+      .collection(collections.TIMETABLE_COLLECTION)
+      .insertOne(timetable)
+      .then((data) => {
+        console.log("Timetable added:", data);
+
+        const timetableId = data.insertedId; // ✅ Get the inserted timetable ID
+
+        // ✅ Update the teacher documents with the latest timetable
+        for (let i = 1; i <= 6; i++) {
+          if (timetable[`teacher${i}`]) {
+            db.get()
+              .collection(collections.TEACHER_COLLECTION)
+              .updateOne(
+                { _id: timetable[`teacher${i}`] }, // ✅ Find teacher by ID
+                { $set: { timetable: timetableId } } // ✅ Replace the timetable field
+              )
+              .then(() => {
+                console.log(`Timetable ID ${timetableId} set for Teacher ${timetable[`teacher${i}`]}`);
+              })
+              .catch((err) => console.error("Error updating teacher:", err));
+          }
+        }
+
+        callback(timetableId);
+      })
+      .catch((err) => console.error("Error inserting timetable:", err));
+  },
+
+
+  ///////All Attendance/////////////////////                                         
+  getAllattendance: () => {
+    return new Promise(async (resolve, reject) => {
+      try {
+        // Fetch attendance with necessary details using aggregation
+        let attendance = await db
+          .get()
+          .collection(collections.ATTENDANCE_COLLECTION)
+          .aggregate([
+            {
+              // Lookup for teacher details
+              $lookup: {
+                from: collections.TEACHER_COLLECTION,
+                localField: "teacherId",  // Teacher ID in the attendance collection
+                foreignField: "_id",  // Match with the _id in the teachers collection
+                as: "teacherDetails"  // Output as teacherDetails array
+              }
+            },
+            {
+              // Unwind teacherDetails to extract single teacher object
+              $unwind: {
+                path: "$teacherDetails",
+                preserveNullAndEmptyArrays: true
+              }
+            },
+            {
+              // Lookup for subject details
+              $lookup: {
+                from: collections.SUBJECT_COLLECTION,
+                localField: "subjectId",  // Subject ID in the attendance collection
+                foreignField: "_id",  // Match with the _id in the subjects collection
+                as: "subjectDetails"  // Output as subjectDetails array
+              }
+            },
+            {
+              // Unwind subjectDetails to extract single subject object
+              $unwind: {
+                path: "$subjectDetails",
+                preserveNullAndEmptyArrays: true
+              }
+            },
+            {
+              // Lookup for selected users details
+              $lookup: {
+                from: collections.USERS_COLLECTION,
+                localField: "selectedUsers",  // Selected user IDs in the attendance collection
+                foreignField: "_id",  // Match with _id in the users collection
+                as: "selectedUserDetails"  // Output as selectedUserDetails array
+              }
+            },
+            {
+              // Project necessary fields
+              $project: {
+                date: 1,
+                subject: 1,
+                teacherName: { $ifNull: ["$teacherDetails.Name", ""] },  // Teacher's name
+                subjectName: { $ifNull: ["$subjectDetails.sname", ""] },  // Subject name
+                selectedUsers: "$selectedUserDetails.Fname",  // User's first name from selected users
+              }
+            }
+          ])
+          .toArray();
+
+        // Resolve with the fetched attendance details
+        resolve(attendance);
+      } catch (err) {
+        console.error("Error fetching attendance:", err);
+        reject(err);  // Reject if an error occurs
+      }
+    });
+  }
+
+
+
 };

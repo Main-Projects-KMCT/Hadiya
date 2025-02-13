@@ -8,6 +8,9 @@ module.exports = {
     WORKSPACE_COLLECTION: "workspace",
     FEEDBACK_COLLECTION: "feedback",
     NOTIFICATIONS_COLLECTION: "notification",
-
+    SUBJECT_COLLECTION: 'subjects',
+    ATTENDANCE_COLLECTION: 'attendance',
+    TIMETABLE_COLLECTION: "time-table",
+    MATERIAL_COLLECTION: 'materials',
 
 }
