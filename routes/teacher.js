@@ -65,6 +65,55 @@ router.get("/", verifySignedIn, async function (req, res, next) {
 });
 
 
+
+router.post("/submit-attendance", function (req, res) {
+  console.log(req.body); // Log the entire request body for debugging
+
+  const attendance = {
+    date: req.body.date,
+    selectedDate: req.body.selectedDate,
+    period: req.body.period,
+    Class: req.body.Class,
+
+    teacherId: req.body.teacherId,
+    subjectId: req.body.subjectId,
+    subject: req.body.subject,
+
+    present: req.body.present || [],
+    absent: req.body.absent || [],
+
+  };
+
+  teacherHelper.addattendance(attendance, (id) => {
+    if (id) {
+      res.redirect("/teacher");
+    } else {
+      res.status(500).send("Error adding attendance");
+    }
+  });
+});
+
+
+
+router.get("/tleave", verifySignedIn, async function (req, res, next) {
+  let teacher = req.session.teacher;
+  if (!teacher || !teacher._id) {
+    return res.status(403).send("Unauthorized");
+  }
+  const leaves = await userHelper.getleavesByIdT(teacher._id);  // ✅ Pass user ID
+  res.render("teacher/tleave", { admin: false, leaves, layout: "teacher", teacher });
+
+});
+
+router.post("/add-leave", function (req, res) {
+  userHelper.addLeaveT(req.body, (id) => {
+    res.redirect("/teacher/tleave");
+
+  });
+});
+
+
+
 ///////ALL timetables/////////////////////                                         
 router.get("/timetables", verifySignedIn, async function (req, res) {
   let teacher = req.session.teacher; // Ensure session contains teacher details
@@ -776,6 +825,99 @@ router.post("/search", verifySignedIn, function (req, res) {
     res.render("teacher/search-result", { teacher: true, layout: "teacher", workspace, response });
   });
 });
+
+
+
+
+///////ALL task/////////////////////                                         
+router.get("/all-tasks", verifySignedIn, function (req, res) {
+  let teacher = req.session.teacher;
+  teacherHelper.getAlltasks(req.session.teacher._id).then((tasks) => {
+    res.render("teacher/all-tasks", { teacher: true, layout: "teacher", tasks, teacher });
+  });
+});
+
+///////ADD workspace/////////////////////                                         
+router.get("/add-task", verifySignedIn, function (req, res) {
+  let teacher = req.session.teacher;
+  res.render("teacher/add-task", { teacher: true, layout: "teacher", teacher });
+});
+
+///////ADD task/////////////////////                                         
+router.post("/add-task", function (req, res) {
+  if (req.session.signedInTeacher && req.session.teacher && req.session.teacher._id) {
+    const teacherId = req.session.teacher._id;
+
+    teacherHelper.addtask(req.body, teacherId, (taskId, error) => {
+      if (error) {
+        console.log("Error adding task:", error);
+        return res.status(500).send("Failed to add task");
+      }
+
+      // Redirect to the all tasks page after adding the task
+      res.redirect("/teacher/all-tasks");
+    });
+  } else {
+    res.redirect("/teacher/signin");
+  }
+});
+
+
+
+router.get("/delete-task/:id", verifySignedIn, function (req, res) {
+  let taskId = req.params.id;
+  teacherHelper.deletetask(taskId).then((response) => {
+    res.redirect("/teacher/all-tasks");
+  });
+});
+
+
+
+
+
+router.get("/all-exam", verifySignedIn, function (req, res) {
+  let teacher = req.session.teacher;
+  teacherHelper.getexamById(teacher._id).then((exams) => {
+    res.render("teacher/all-exam", { teacher: true, layout: "teacher", exams, teacher });
+  }).catch((err) => {
+    console.error("Error fetching exam:", err);
+    res.status(500).send("Internal Server Error");
+  });
+});
+
+
+router.get("/add-exam", verifySignedIn, function (req, res) {
+  let teacher = req.session.teacher;
+  res.render("teacher/add-exam", { teacher: true, layout: "teacher", teacher });
+});
+
+
+
+router.post("/add-exam", function (req, res) {
+  if (req.session.signedInTeacher && req.session.teacher && req.session.teacher._id) {
+    const teacherId = req.session.teacher._id;
+
+    teacherHelper.addexam(req.body, teacherId, (examId, error) => {
+      if (error) {
+        console.log("Error adding exam:", error);
+        return res.status(500).send("Failed to add exam");
+      }
+
+      // Redirect to the all exams page after adding the exam
+      res.redirect("/teacher/all-exam");
+    });
+  } else {
+    res.redirect("/teacher/signin");
+  }
+});
+
+router.get("/delete-exam/:id", verifySignedIn, function (req, res) {
+  let examId = req.params.id;
+  teacherHelper.deleteexam(examId).then((response) => {
+    res.redirect("/teacher/all-exam");
+  });
+});
+
 
 
 module.exports = router;

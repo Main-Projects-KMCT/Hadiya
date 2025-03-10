@@ -5,6 +5,11 @@
         background-color: white;
     }
 </style>
+<style>
+    .header {
+        background-color: black !important;
+    }
+</style>
 <div class="card p-5">
     <div class="row g-5">
 
@@ -22,8 +27,30 @@
                     <p>{{this.message}}</p>
                 </div>
                 {{else}}
+                <p></p>
+                {{/each}}
+
+
+                {{#each products}}
+                <div class="card p-3 shadow mb-2">
+                    <p>{{formatDate this.createdAt}}</p>
+                    <p>
+                        <strong class="">By College<br></strong>
+                    </p>
+                    <p>{{this.Name}}</p>
+                    <h5>{{this.Price}}/-</h5>
+                    <p>{{this.Description}}</p>
+
+                    <button class="btn btn-creative btn-dark btn-lg ct-btn buy-now" data-id="{{this._id}}"
+                        data-seats="{{this.seat}}">Buy Now</button>
+
+                </div>
+                {{else}}
                 <p>No notifications available!</p>
                 {{/each}}
+
+
+
             </div>
         </div>
     </div>
@@ -31,3 +58,56 @@
 
 
 </div>
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const buyNowButtons = document.querySelectorAll('.buy-now');
+
+        buyNowButtons.forEach(button => {
+            const seatsAvailable = parseInt(button.getAttribute('data-seats'), 10);
+
+            if (seatsAvailable === 0) {
+                button.disabled = true; // Disable the button if sold out
+                button.textContent = 'Sold Out'; // Change the button text
+                button.classList.add('disabled'); // Optionally add a disabled class for styling
+            } else {
+                button.addEventListener('click', function () {
+                    buyNow(button.getAttribute('data-id')); // Call the buyNow function
+                });
+            }
+        });
+    });
+
+    function buyNow(workspaceId) {
+        // Your buy now logic here, for example:
+        alert('Buying workspace with ID: ' + workspaceId);
+        // Implement your purchase logic (e.g., make an API call)
+    }
+</script>
+
+<script>
+    function elementsSearch() {
+        var input = document.getElementById('elementsSearchInput');
+        var filter = input.value.toUpperCase();
+        var list = document.getElementById("elementsSearchList");
+        var listItem = list.getElementsByClassName('col-6');
+
+        for (i = 0; i < listItem.length; i++) {
+            var a = listItem[i];
+            var textValue = a.textContent || a.innerText;
+            if (textValue.toUpperCase().indexOf(filter) > -1) {
+                listItem[i].style.display = "";
+            } else {
+                listItem[i].style.display = "none";
+            }
+        }
+    }
+
+</script>
+<script>
+    function buyNow(workspaceId) {
+        window.location.href = '/place-order/' + workspaceId;
+    }
+
+</script>
