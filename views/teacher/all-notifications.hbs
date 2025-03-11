@@ -11,11 +11,11 @@
                         <form action="/builder/add-notification" method="post" class="mb-3">
 
                             <input type="hidden" name="builderId" value="{{builder._id}}">
-                            <input type="hidden" name="by" value="{{builder.Companyname}}">
+                            <input type="hidden" name="by" value="{{builder.Name}}">
 
                             <!-- Hidden field for workspace ID -->
                             {{!-- <label for="" class="mb-2">Your name</label>
-                            <input class="form-control" type="text" name="buildername" value={{builder.Companyname}}>
+                            <input class="form-control" type="text" name="buildername" value={{builder.Name}}>
                             --}}
 
                             <select class="form-select" name="userId" aria-label="Default select example">

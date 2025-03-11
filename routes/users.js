@@ -24,6 +24,41 @@ router.get("/", async function (req, res, next) {
 });
 
 
+router.get("/dashboard", verifySignedIn, async function (req, res, next) {
+  let user = req.session.user;
+  userHelper.getAllworkspaces().then((workspaces) => {
+    res.render("users/dashboard/home", { admin: false, workspaces, user });
+  });
+});
+
+
+///////ALL attendances/////////////////////                                         
+router.get("/attendance", verifySignedIn, async function (req, res) {
+  try {
+    let user = req.session.user;
+    if (!user || !user._id) {
+      return res.status(403).send("Unauthorized");
+    }
+
+    const attendanceData = await userHelper.getAllattendancebyid(user._id);  // ✅ Pass user ID
+
+    console.log("Attendance Data:", JSON.stringify(attendanceData, null, 2)); // Debugging
+
+    res.render("users/dashboard/attendance", {
+      admin: false,
+      layout: 'layout',
+      attendance: attendanceData,
+      user
+    });
+
+  } catch (error) {
+    console.error("Error fetching attendance:", error);
+    res.status(500).send("Internal Server Error");
+  }
+});
+
+
+
 router.get("/notifications", verifySignedIn, function (req, res) {
   let user = req.session.user;  // Get logged-in user from session
 

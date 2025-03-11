@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Timetable</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      background-color: #f4f4f4;
+      margin: 0;
+      padding: 0;
+    }
+    .header {
+      background-color: #007bff;
+      color: white;
+      padding: 20px;
+      text-align: center;
+      font-size: 24px;
+    }
+    .timetable-container {
+      margin: 40px auto;
+      max-width: 900px;
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    .timetable-table th, .timetable-table td {
+      text-align: center;
+      vertical-align: middle;
+      border: 1px solid #ddd;
+      padding: 10px;
+    }
+    .timetable-table th {
+      background-color: #007bff;
+      color: white;
+    }
+    .subject-cell {
+      font-weight: 500;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    Student Timetable
+  </div>
+  <div class="timetable-container">
+    <table class="table timetable-table">
+      <thead>
+        <tr>
+          <th>Period</th>
+          <th>Monday</th>
+          <th>Tuesday</th>
+          <th>Wednesday</th>
+          <th>Thursday</th>
+          <th>Friday</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1</td>
+          <td class="subject-cell">Mathematics</td>
+          <td class="subject-cell">Physics</td>
+          <td class="subject-cell">Chemistry</td>
+          <td class="subject-cell">Biology</td>
+          <td class="subject-cell">English</td>
+        </tr>
+        <tr>
+          <td>2</td>
+          <td class="subject-cell">History</td>
+          <td class="subject-cell">Geography</td>
+          <td class="subject-cell">Mathematics</td>
+          <td class="subject-cell">Computer Science</td>
+          <td class="subject-cell">Economics</td>
+        </tr>
+        <tr>
+          <td>3</td>
+          <td class="subject-cell">Physics</td>
+          <td class="subject-cell">Chemistry</td>
+          <td class="subject-cell">Biology</td>
+          <td class="subject-cell">Mathematics</td>
+          <td class="subject-cell">Physical Ed.</td>
+        </tr>
+        <tr>
+          <td>4</td>
+          <td class="subject-cell">English</td>
+          <td class="subject-cell">History</td>
+          <td class="subject-cell">Geography</td>
+          <td class="subject-cell">Computer Science</td>
+          <td class="subject-cell">Economics</td>
+        </tr>
+        <tr>
+          <td>5</td>
+          <td class="subject-cell">Free Period</td>
+          <td class="subject-cell">Free Period</td>
+          <td class="subject-cell">Free Period</td>
+          <td class="subject-cell">Free Period</td>
+          <td class="subject-cell">Free Period</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</body>
+</html>

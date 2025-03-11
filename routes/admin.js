@@ -363,4 +363,64 @@ router.post("/search", verifySignedIn, function (req, res) {
 });
 
 
+///////////////////////////////////////////////////////////////
+
+///////ALL subjects/////////////////////                                         
+router.get("/all-subjects", verifySignedIn, async function (req, res) {
+  let administator = req.session.admin;
+  let subjects = await adminHelper.getAllSubjects();
+  let teachers = await adminHelper.getAllteachers();
+
+  res.render("admin/subjects/all-subjects", { admin: true, layout: "admin-layout", subjects, administator, teachers });
+});
+
+///////ADD teacher/////////////////////                                         
+router.post("/add-subject", function (req, res) {
+  adminHelper.addSubject(req.body, (id) => {
+    res.redirect("/admin/subjects/all-subjects");
+
+  });
+});
+
+router.post("/delete-subject/:id", verifySignedIn, async function (req, res) {
+  await db.get().collection(collections.SUBJECT_COLLECTION).deleteOne({ _id: ObjectId(req.params.id) });
+  res.redirect("/admin/subjects/all-subjects");
+});
+
+
+///////ALL timetables/////////////////////                                         
+router.get("/all-timetables", verifySignedIn, async function (req, res) {
+  let administator = req.session.admin;
+  let timetables = await adminHelper.getAllTimetables();
+  let teachers = await adminHelper.getAllteachers();
+
+  res.render("admin/timetables/all-timetables", { admin: true, layout: "admin-layout", timetables, administator, teachers });
+});
+
+///////ADD teacher/////////////////////                                         
+router.post("/add-timetable", function (req, res) {
+  adminHelper.addTimetable(req.body, (id) => {
+    res.redirect("/admin/timetables/all-timetables");
+
+  });
+});
+
+router.post("/delete-timetable/:id", verifySignedIn, async function (req, res) {
+  await db.get().collection(collections.TIMETABLE_COLLECTION).deleteOne({ _id: ObjectId(req.params.id) });
+  res.redirect("/admin/timetables/all-timetables");
+});
+
+
+
+///////ALL attendances/////////////////////                                         
+router.get("/all-attendances", verifySignedIn, async function (req, res) {
+  let administator = req.session.admin;
+  const attendanceData = await adminHelper.getAllattendance();
+  console.log("Attendance Data:", JSON.stringify(attendanceData, null, 2)); // Debugging
+  res.render("admin/attendance/all-attendances", { admin: true, layout: "admin-layout", attendance: attendanceData, administator });
+});
+
+
+
+
 module.exports = router;

@@ -6,6 +6,35 @@ const objectId = require("mongodb").ObjectID;
 module.exports = {
 
 
+  addattendance: (attendance, callback) => {
+    // Check if selectedUsers is a single string or an array and normalize it
+    const selectedUsers = Array.isArray(attendance.selectedUsers)
+      ? attendance.selectedUsers
+      : attendance.selectedUsers ? [attendance.selectedUsers] : [];  // If it's a string, wrap it in an array, if it's empty, use an empty array
+
+    const attendanceData = {
+      date: attendance.date,
+      teacherId: new objectId(attendance.teacherId),  // Convert to ObjectId
+      subjectId: new objectId(attendance.subjectId),  // Convert to ObjectId
+      subject: attendance.subject,  // Subject name remains as string
+      selectedUsers: selectedUsers.map(id => new objectId(id)),  // Convert each selected user ID to ObjectId
+    };
+
+    db.get()
+      .collection(collections.ATTENDANCE_COLLECTION)
+      .insertOne(attendanceData)
+      .then((data) => {
+        console.log("Attendance added:", data);
+        callback(data.insertedId); // Return inserted ID
+      })
+      .catch((err) => {
+        console.error("Error adding attendance:", err);
+        callback(null); // Handle errors appropriately
+      });
+  },
+
+
+
   ///////ADD notification/////////////////////                                         
   addnotification: (notification, callback) => {
     // Convert teacherId and userId to ObjectId if they are provided in the notification
@@ -154,20 +183,20 @@ module.exports = {
     });
   },
 
-  ///////ADD workspace/////////////////////                                         
-  addworkspace: (workspace, teacherId, callback) => {
+  ///////ADD material/////////////////////                                         
+  addmaterial: (material, teacherId, callback) => {
     if (!teacherId || !objectId.isValid(teacherId)) {
       return callback(null, new Error("Invalid or missing teacherId"));
     }
 
-    workspace.Price = parseInt(workspace.Price);
-    workspace.teacherId = objectId(teacherId); // Associate workspace with the teacher
+    material.Price = parseInt(material.Price);
+    material.teacherId = objectId(teacherId); // Associate material with the teacher
 
     db.get()
-      .collection(collections.WORKSPACE_COLLECTION)
-      .insertOne(workspace)
+      .collection(collections.MATERIAL_COLLECTION)
+      .insertOne(material)
       .then((data) => {
-        callback(data.ops[0]._id); // Return the inserted workspace ID
+        callback(data.ops[0]._id); // Return the inserted material ID
       })
       .catch((error) => {
         callback(null, error);
@@ -175,25 +204,25 @@ module.exports = {
   },
 
 
-  ///////GET ALL workspace/////////////////////                                            
-  getAllworkspaces: (teacherId) => {
+  ///////GET ALL material/////////////////////                                            
+  getAllmaterials: (teacherId) => {
     return new Promise(async (resolve, reject) => {
-      let workspaces = await db
+      let materials = await db
         .get()
-        .collection(collections.WORKSPACE_COLLECTION)
+        .collection(collections.MATERIAL_COLLECTION)
         .find({ teacherId: objectId(teacherId) }) // Filter by teacherId
         .toArray();
-      resolve(workspaces);
+      resolve(materials);
     });
   },
 
-  ///////ADD workspace DETAILS/////////////////////                                            
-  getworkspaceDetails: (workspaceId) => {
+  ///////ADD material DETAILS/////////////////////                                            
+  getmaterialDetails: (materialId) => {
     return new Promise((resolve, reject) => {
       db.get()
-        .collection(collections.WORKSPACE_COLLECTION)
+        .collection(collections.MATERIAL_COLLECTION)
         .findOne({
-          _id: objectId(workspaceId)
+          _id: objectId(materialId)
         })
         .then((response) => {
           resolve(response);
@@ -201,13 +230,13 @@ module.exports = {
     });
   },
 
-  ///////DELETE workspace/////////////////////                                            
-  deleteworkspace: (workspaceId) => {
+  ///////DELETE material/////////////////////                                            
+  deletematerial: (materialId) => {
     return new Promise((resolve, reject) => {
       db.get()
-        .collection(collections.WORKSPACE_COLLECTION)
+        .collection(collections.MATERIAL_COLLECTION)
         .removeOne({
-          _id: objectId(workspaceId)
+          _id: objectId(materialId)
         })
         .then((response) => {
           console.log(response);
@@ -216,23 +245,23 @@ module.exports = {
     });
   },
 
-  ///////UPDATE workspace/////////////////////                                            
-  updateworkspace: (workspaceId, workspaceDetails) => {
+  ///////UPDATE material/////////////////////                                            
+  updatematerial: (materialId, materialDetails) => {
     return new Promise((resolve, reject) => {
       db.get()
-        .collection(collections.WORKSPACE_COLLECTION)
+        .collection(collections.MATERIAL_COLLECTION)
         .updateOne(
           {
-            _id: objectId(workspaceId)
+            _id: objectId(materialId)
           },
           {
             $set: {
-              wname: workspaceDetails.wname,
-              seat: workspaceDetails.seat,
-              Price: workspaceDetails.Price,
-              format: workspaceDetails.format,
-              desc: workspaceDetails.desc,
-              baddress: workspaceDetails.baddress,
+              wname: materialDetails.wname,
+              seat: materialDetails.seat,
+              Price: materialDetails.Price,
+              format: materialDetails.format,
+              desc: materialDetails.desc,
+              baddress: materialDetails.baddress,
 
             },
           }
@@ -244,11 +273,11 @@ module.exports = {
   },
 
 
-  ///////DELETE ALL workspace/////////////////////                                            
-  deleteAllworkspaces: () => {
+  ///////DELETE ALL material/////////////////////                                            
+  deleteAllmaterials: () => {
     return new Promise((resolve, reject) => {
       db.get()
-        .collection(collections.WORKSPACE_COLLECTION)
+        .collection(collections.MATERIAL_COLLECTION)
         .remove({})
         .then(() => {
           resolve();
@@ -456,7 +485,7 @@ module.exports = {
   cancelOrder: async (orderId) => {
     return new Promise(async (resolve, reject) => {
       try {
-        // Fetch the order to get the associated workspace ID
+        // Fetch the order to get the associated material ID
         const order = await db.get()
           .collection(collections.ORDER_COLLECTION)
           .findOne({ _id: objectId(orderId) });
@@ -465,31 +494,31 @@ module.exports = {
           return reject(new Error("Order not found."));
         }
 
-        const workspaceId = order.workspace._id; // Get the workspace ID from the order
+        const materialId = order.material._id; // Get the material ID from the order
 
         // Remove the order from the database
         await db.get()
           .collection(collections.ORDER_COLLECTION)
           .deleteOne({ _id: objectId(orderId) });
 
-        // Get the current seat count from the workspace
-        const workspaceDoc = await db.get()
-          .collection(collections.WORKSPACE_COLLECTION)
-          .findOne({ _id: objectId(workspaceId) });
+        // Get the current seat count from the material
+        const materialDoc = await db.get()
+          .collection(collections.MATERIAL_COLLECTION)
+          .findOne({ _id: objectId(materialId) });
 
         // Check if the seat field exists and is a string
-        if (workspaceDoc && workspaceDoc.seat) {
-          let seatCount = Number(workspaceDoc.seat); // Convert seat count from string to number
+        if (materialDoc && materialDoc.seat) {
+          let seatCount = Number(materialDoc.seat); // Convert seat count from string to number
 
           // Check if the seatCount is a valid number
           if (!isNaN(seatCount)) {
             seatCount += 1; // Increment the seat count
 
-            // Convert back to string and update the workspace seat count
+            // Convert back to string and update the material seat count
             await db.get()
-              .collection(collections.WORKSPACE_COLLECTION)
+              .collection(collections.MATERIAL_COLLECTION)
               .updateOne(
-                { _id: objectId(workspaceId) },
+                { _id: objectId(materialId) },
                 { $set: { seat: seatCount.toString() } } // Convert number back to string
               );
 
@@ -498,7 +527,7 @@ module.exports = {
             return reject(new Error("Seat count is not a valid number."));
           }
         } else {
-          return reject(new Error("Workspace not found or seat field is missing."));
+          return reject(new Error("Material not found or seat field is missing."));
         }
       } catch (error) {
         console.error("Error canceling order:", error);

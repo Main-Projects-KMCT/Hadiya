@@ -13,6 +13,155 @@ var instance = new Razorpay({
 
 module.exports = {
 
+
+  ///////All Attendance/////////////////////                                         
+  getAllattendance: () => {
+    return new Promise(async (resolve, reject) => {
+      try {
+        // Fetch attendance with necessary details using aggregation
+        let attendance = await db
+          .get()
+          .collection(collections.ATTENDANCE_COLLECTION)
+          .aggregate([
+            {
+              // Lookup for teacher details
+              $lookup: {
+                from: collections.TEACHER_COLLECTION,
+                localField: "teacherId",  // Teacher ID in the attendance collection
+                foreignField: "_id",  // Match with the _id in the teachers collection
+                as: "teacherDetails"  // Output as teacherDetails array
+              }
+            },
+            {
+              // Unwind teacherDetails to extract single teacher object
+              $unwind: {
+                path: "$teacherDetails",
+                preserveNullAndEmptyArrays: true
+              }
+            },
+            {
+              // Lookup for subject details
+              $lookup: {
+                from: collections.SUBJECT_COLLECTION,
+                localField: "subjectId",  // Subject ID in the attendance collection
+                foreignField: "_id",  // Match with the _id in the subjects collection
+                as: "subjectDetails"  // Output as subjectDetails array
+              }
+            },
+            {
+              // Unwind subjectDetails to extract single subject object
+              $unwind: {
+                path: "$subjectDetails",
+                preserveNullAndEmptyArrays: true
+              }
+            },
+            {
+              // Lookup for selected users details
+              $lookup: {
+                from: collections.USERS_COLLECTION,
+                localField: "selectedUsers",  // Selected user IDs in the attendance collection
+                foreignField: "_id",  // Match with _id in the users collection
+                as: "selectedUserDetails"  // Output as selectedUserDetails array
+              }
+            },
+            {
+              // Project necessary fields
+              $project: {
+                date: 1,
+                subject: 1,
+                teacherName: { $ifNull: ["$teacherDetails.Name", ""] },  // Teacher's name
+                subjectName: { $ifNull: ["$subjectDetails.sname", ""] },  // Subject name
+                selectedUsers: "$selectedUserDetails.Fname",  // User's first name from selected users
+              }
+            }
+          ])
+          .toArray();
+
+        // Resolve with the fetched attendance details
+        resolve(attendance);
+      } catch (err) {
+        console.error("Error fetching attendance:", err);
+        reject(err);  // Reject if an error occurs
+      }
+    });
+  },
+
+
+  ///////All Attendance by id/////////////////////                                         
+  getAllattendancebyid: (userId) => {  // Accept userId as a parameter
+    return new Promise(async (resolve, reject) => {
+      try {
+        let attendance = await db
+          .get()
+          .collection(collections.ATTENDANCE_COLLECTION)
+          .aggregate([
+            {
+              // Filter attendance for the logged-in user
+              $match: {
+                selectedUsers: new ObjectId(userId)  // ✅ Match userId in the selectedUsers array
+              }
+            },
+            {
+              // Lookup for teacher details
+              $lookup: {
+                from: collections.TEACHER_COLLECTION,
+                localField: "teacherId",
+                foreignField: "_id",
+                as: "teacherDetails"
+              }
+            },
+            {
+              // Unwind teacherDetails to extract a single teacher object
+              $unwind: {
+                path: "$teacherDetails",
+                preserveNullAndEmptyArrays: true
+              }
+            },
+            {
+              // Lookup for subject details
+              $lookup: {
+                from: collections.SUBJECT_COLLECTION,
+                localField: "subjectId",
+                foreignField: "_id",
+                as: "subjectDetails"
+              }
+            },
+            {
+              // Unwind subjectDetails to extract a single subject object
+              $unwind: {
+                path: "$subjectDetails",
+                preserveNullAndEmptyArrays: true
+              }
+            },
+            {
+              // Lookup for selected user details
+              $lookup: {
+                from: collections.USERS_COLLECTION,
+                localField: "selectedUsers",
+                foreignField: "_id",
+                as: "selectedUserDetails"
+              }
+            },
+            {
+              // Project necessary fields
+              $project: {
+                date: 1,
+                subject: 1,
+                teacherName: { $ifNull: ["$teacherDetails.Name", ""] },
+                subjectName: { $ifNull: ["$subjectDetails.sname", ""] },
+                selectedUsers: "$selectedUserDetails.Fname",  // User's first name from selected users
+              }
+            }
+          ])
+          .toArray();
+
+        resolve(attendance);
+      } catch (err) {
+        console.error("Error fetching attendance:", err);
+        reject(err);
+      }
+    });
+  },
   getnotificationById: (userId) => {
     return new Promise(async (resolve, reject) => {
       try {
