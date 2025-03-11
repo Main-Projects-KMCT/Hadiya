@@ -195,6 +195,8 @@ module.exports = {
   addProduct: (product, callback) => {
     console.log(product);
     product.Price = parseInt(product.Price);
+    product.createdAt = new Date();
+
     db.get()
       .collection(collections.PRODUCTS_COLLECTION)
       .insertOne(product)
@@ -330,6 +332,44 @@ module.exports = {
   },
 
 
+
+
+  getAllTleaves: () => {
+    return new Promise(async (resolve, reject) => {
+      try {
+        const tleaves = await db
+          .get()
+          .collection(collections.TLEAVE_COLLECTION)
+          .find()
+          .toArray();
+
+        resolve(tleaves);
+      } catch (err) {
+        reject(err);  // Handle any error during fetching
+      }
+    });
+  },
+
+
+
+  getAllSleaves: () => {
+    return new Promise(async (resolve, reject) => {
+      try {
+        const sleaves = await db
+          .get()
+          .collection(collections.LEAVE_COLLECTION)
+          .find()
+          .toArray();
+
+        resolve(sleaves);
+      } catch (err) {
+        reject(err);  // Handle any error during fetching
+      }
+    });
+  },
+
+
+
   removeUser: (userId) => {
     return new Promise((resolve, reject) => {
       db.get()
@@ -444,6 +484,47 @@ module.exports = {
         });
     });
   },
+
+
+
+  changeStatusLeave: (status, tleaveId) => {
+    return new Promise((resolve, reject) => {
+      db.get()
+        .collection(collections.TLEAVE_COLLECTION)
+        .updateOne(
+          { _id: objectId(tleaveId) },
+          {
+            $set: {
+              "status": status,
+            },
+          }
+        )
+        .then(() => {
+          resolve();
+        });
+    });
+  },
+
+
+
+  changeStatusLeaveS: (status, sleaveId) => {
+    return new Promise((resolve, reject) => {
+      db.get()
+        .collection(collections.LEAVE_COLLECTION)
+        .updateOne(
+          { _id: objectId(sleaveId) },
+          {
+            $set: {
+              "status": status,
+            },
+          }
+        )
+        .then(() => {
+          resolve();
+        });
+    });
+  },
+
 
   cancelOrder: (orderId) => {
     return new Promise((resolve, reject) => {

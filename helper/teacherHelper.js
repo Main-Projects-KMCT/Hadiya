@@ -6,18 +6,175 @@ const objectId = require("mongodb").ObjectID;
 module.exports = {
 
 
+
+  getexamById: (teacherId) => {
+    return new Promise(async (resolve, reject) => {
+      try {
+        // Fetch exams based on teacherId (converted to ObjectId)
+        const exams = await db.get()
+          .collection(collections.EXAM_COLLECTION)
+          .find({ teacherId: objectId(teacherId) }) // Filter by logged-in userId
+          .toArray();
+
+        resolve(exams);
+      } catch (error) {
+        reject(error);
+      }
+    });
+  },
+
+
+  addexam: (exam, teacherId, callback) => {
+    if (!teacherId || !objectId.isValid(teacherId)) {
+      return callback(null, new Error("Invalid or missing teacherId"));
+    }
+
+    exam.createdAt = new Date(); // Set createdAt as the current date and time
+    exam.teacherId = objectId(teacherId); // Associate exam with the teacher
+
+    db.get()
+      .collection(collections.EXAM_COLLECTION)
+      .insertOne(exam)
+      .then((data) => {
+        callback(data.ops[0]._id); // Return the inserted exam ID
+      })
+      .catch((error) => {
+        callback(null, error);
+      });
+  },
+
+
+
+  deleteexam: (examId) => {
+    return new Promise((resolve, reject) => {
+      db.get()
+        .collection(collections.EXAM_COLLECTION)
+        .removeOne({
+          _id: objectId(examId)
+        })
+        .then((response) => {
+          console.log(response);
+          resolve(response);
+        });
+    });
+  },
+
+
+  ///////ADD task/////////////////////                                         
+  addtask: (task, teacherId, callback) => {
+    if (!teacherId || !objectId.isValid(teacherId)) {
+      return callback(null, new Error("Invalid or missing teacherId"));
+    }
+
+    task.Price = parseInt(task.Price);
+    task.teacherId = objectId(teacherId); // Associate task with the teacher
+
+    db.get()
+      .collection(collections.TASK_COLLECTION)
+      .insertOne(task)
+      .then((data) => {
+        callback(data.ops[0]._id); // Return the inserted task ID
+      })
+      .catch((error) => {
+        callback(null, error);
+      });
+  },
+
+
+
+  ///////GET ALL task/////////////////////                                            
+  getAlltasks: () => {
+    return new Promise(async (resolve, reject) => {
+      let tasks = await db
+        .get()
+        .collection(collections.TASK_COLLECTION)
+        .find() // Filter by teacherId
+        .toArray();
+      resolve(tasks);
+    });
+  },
+
+  ///////ADD task DETAILS/////////////////////                                            
+  gettaskDetails: (taskId) => {
+    return new Promise((resolve, reject) => {
+      db.get()
+        .collection(collections.TASK_COLLECTION)
+        .findOne({
+          _id: objectId(taskId)
+        })
+        .then((response) => {
+          resolve(response);
+        });
+    });
+  },
+
+  ///////DELETE task/////////////////////                                            
+  deletetask: (taskId) => {
+    return new Promise((resolve, reject) => {
+      db.get()
+        .collection(collections.TASK_COLLECTION)
+        .removeOne({
+          _id: objectId(taskId)
+        })
+        .then((response) => {
+          console.log(response);
+          resolve(response);
+        });
+    });
+  },
+
+  ///////UPDATE task/////////////////////                                            
+  updatetask: (taskId, taskDetails) => {
+    return new Promise((resolve, reject) => {
+      db.get()
+        .collection(collections.TASK_COLLECTION)
+        .updateOne(
+          {
+            _id: objectId(taskId)
+          },
+          {
+            $set: {
+              wname: taskDetails.wname,
+              seat: taskDetails.seat,
+              Price: taskDetails.Price,
+              format: taskDetails.format,
+              desc: taskDetails.desc,
+              baddress: taskDetails.baddress,
+
+            },
+          }
+        )
+        .then((response) => {
+          resolve();
+        });
+    });
+  },
+
+
+
   addattendance: (attendance, callback) => {
-    // Check if selectedUsers is a single string or an array and normalize it
-    const selectedUsers = Array.isArray(attendance.selectedUsers)
-      ? attendance.selectedUsers
-      : attendance.selectedUsers ? [attendance.selectedUsers] : [];  // If it's a string, wrap it in an array, if it's empty, use an empty array
+
+    const present = Array.isArray(attendance.present)
+      ? attendance.present
+      : attendance.present ? [attendance.present] : [];
+
+    const absent = Array.isArray(attendance.absent)
+      ? attendance.absent
+      : attendance.absent ? [attendance.absent] : [];
+
+
 
     const attendanceData = {
       date: attendance.date,
-      teacherId: new objectId(attendance.teacherId),  // Convert to ObjectId
-      subjectId: new objectId(attendance.subjectId),  // Convert to ObjectId
+      selectedDate: attendance.selectedDate,
+      period: attendance.period,
+      Class: attendance.Class,
+      teacherId: new objectId(attendance.teacherId),  // Convert to objectId
+      subjectId: new objectId(attendance.subjectId),  // Convert to objectId
       subject: attendance.subject,  // Subject name remains as string
-      selectedUsers: selectedUsers.map(id => new objectId(id)),  // Convert each selected user ID to ObjectId
+      present: present.map(id => new objectId(id)),
+      absent: absent.map(id => new objectId(id)),
+
     };
 
     db.get()
@@ -32,6 +189,7 @@ module.exports = {
         callback(null); // Handle errors appropriately
       });
   },
+
 
 
 

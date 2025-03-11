@@ -14,6 +14,87 @@ var instance = new Razorpay({
 module.exports = {
 
 
+  getleavesById: (userId) => {
+    return new Promise(async (resolve, reject) => {
+      try {
+        // Fetch leaves based on userId (converted to ObjectId)
+        const leaves = await db.get()
+          .collection(collections.LEAVE_COLLECTION)
+          .find({ userId: ObjectId(userId) }) // Filter by logged-in userId
+          .toArray();
+
+        resolve(leaves);
+      } catch (error) {
+        reject(error);
+      }
+    });
+  },
+
+
+
+
+  getleavesByIdT: (teacherId) => {
+    return new Promise(async (resolve, reject) => {
+      try {
+        // Fetch leaves based on teacherId (converted to ObjectId)
+        const leaves = await db.get()
+          .collection(collections.TLEAVE_COLLECTION)
+          .find({ teacherId: ObjectId(teacherId) }) // Filter by logged-in userId
+          .toArray();
+
+        resolve(leaves);
+      } catch (error) {
+        reject(error);
+      }
+    });
+  },
+
+
+
+
+  getAlltasks: () => {
+    return new Promise(async (resolve, reject) => {
+      let tasks = await db
+        .get()
+        .collection(collections.TASK_COLLECTION)
+        .find()
+        .toArray();
+      resolve(tasks);
+    });
+  },
+
+
+  getFeedbackByTaskId: (taskId) => {
+    return new Promise(async (resolve, reject) => {
+      try {
+        const feedbacks = await db.get()
+          .collection(collections.FEEDBACK_COLLECTION)
+          .find({ taskId: ObjectId(taskId) }) // Convert taskId to ObjectId
+          .toArray();
+
+        resolve(feedbacks);
+      } catch (error) {
+        reject(error);
+      }
+    });
+  },
+
+
+  getTaskById: (taskId) => {
+    return new Promise(async (resolve, reject) => {
+      try {
+        const task = await db.get()
+          .collection(collections.TASK_COLLECTION)
+          .findOne({ _id: ObjectId(taskId) }); // Convert taskId to ObjectId
+        resolve(task);
+      } catch (error) {
+        reject(error);
+      }
+    });
+  },
+
+
+
   ///////All Attendance/////////////////////                                         
   getAllattendance: () => {
     return new Promise(async (resolve, reject) => {
@@ -147,7 +228,7 @@ module.exports = {
               $project: {
                 date: 1,
                 subject: 1,
-                teacherName: { $ifNull: ["$teacherDetails.Name", ""] },
+                teacherName: { $ifNull: ["$teacherDetails.Companyname", ""] },
                 subjectName: { $ifNull: ["$subjectDetails.sname", ""] },
                 selectedUsers: "$selectedUserDetails.Fname",  // User's first name from selected users
               }
@@ -195,12 +276,59 @@ module.exports = {
 
 
 
-  getFeedbackByWorkspaceId: (workspaceId) => {
+  addLeave: (leave, callback) => {
+    console.log(leave);
+
+    // Convert userId to ObjectId
+    if (leave.userId) {
+      leave.userId = new ObjectId(leave.userId);
+    }
+
+    db.get()
+      .collection(collections.LEAVE_COLLECTION)
+      .insertOne(leave)
+      .then((data) => {
+        console.log(data);
+        callback(data.insertedId);
+      })
+      .catch((err) => {
+        console.error("Error inserting leave:", err);
+        callback(null);
+      });
+  },
+
+
+
+
+  addLeaveT: (tleave, callback) => {
+    console.log(tleave);
+
+    // Convert userId to ObjectId
+    if (tleave.teacherId) {
+      tleave.teacherId = new ObjectId(tleave.teacherId);
+    }
+
+    db.get()
+      .collection(collections.TLEAVE_COLLECTION)
+      .insertOne(tleave)
+      .then((data) => {
+        console.log(data);
+        callback(data.insertedId);
+      })
+      .catch((err) => {
+        console.error("Error inserting tleave:", err);
+        callback(null);
+      });
+  },
+
+
+
+  getFeedbackByProductId: (productId) => {
     return new Promise(async (resolve, reject) => {
       try {
         const feedbacks = await db.get()
           .collection(collections.FEEDBACK_COLLECTION)
-          .find({ workspaceId: ObjectId(workspaceId) }) // Convert workspaceId to ObjectId
+          .find({ productId: ObjectId(productId) }) // Convert productId to ObjectId
           .toArray();
 
         resolve(feedbacks);
@@ -231,50 +359,50 @@ module.exports = {
 
 
 
-  ///////GET ALL workspace/////////////////////     
+  ///////GET ALL product/////////////////////     
 
-  getAllworkspaces: () => {
+  getAllproducts: () => {
     return new Promise(async (resolve, reject) => {
-      let workspaces = await db
+      let products = await db
         .get()
-        .collection(collections.WORKSPACE_COLLECTION)
+        .collection(collections.PRODUCTS_COLLECTION)
         .find()
         .toArray();
-      resolve(workspaces);
+      resolve(products);
     });
   },
 
-  getWorkspaceById: (workspaceId) => {
+  getProductById: (productId) => {
     return new Promise(async (resolve, reject) => {
       try {
-        const workspace = await db.get()
-          .collection(collections.WORKSPACE_COLLECTION)
-          .findOne({ _id: ObjectId(workspaceId) }); // Convert workspaceId to ObjectId
-        resolve(workspace);
+        const product = await db.get()
+          .collection(collections.PRODUCTS_COLLECTION)
+          .findOne({ _id: ObjectId(productId) }); // Convert productId to ObjectId
+        resolve(product);
       } catch (error) {
         reject(error);
       }
     });
   },
 
-  // getAllworkspaces: (teacherId) => {
+  // getAllproducts: (teacherId) => {
   //   return new Promise(async (resolve, reject) => {
-  //     let workspaces = await db
+  //     let products = await db
   //       .get()
-  //       .collection(collections.WORKSPACE_COLLECTION)
+  //       .collection(collections.PRODUCTS_COLLECTION)
   //       .find({ teacherId: objectId(teacherId) }) // Filter by teacherId
   //       .toArray();
-  //     resolve(workspaces);
+  //     resolve(products);
   //   });
   // },
 
-  /////// workspace DETAILS/////////////////////                                            
-  getworkspaceDetails: (workspaceId) => {
+  /////// product DETAILS/////////////////////                                            
+  getproductDetails: (productId) => {
     return new Promise((resolve, reject) => {
       db.get()
-        .collection(collections.WORKSPACE_COLLECTION)
+        .collection(collections.PRODUCTS_COLLECTION)
         .findOne({
-          _id: objectId(workspaceId)
+          _id: objectId(productId)
         })
         .then((response) => {
           resolve(response);
@@ -450,22 +578,22 @@ module.exports = {
 
 
 
-  getWorkspaceDetails: (workspaceId) => {
+  getProductDetails: (productId) => {
     return new Promise((resolve, reject) => {
-      if (!ObjectId.isValid(workspaceId)) {
-        reject(new Error('Invalid workspace ID format'));
+      if (!ObjectId.isValid(productId)) {
+        reject(new Error('Invalid product ID format'));
         return;
       }
 
       db.get()
-        .collection(collections.WORKSPACE_COLLECTION)
-        .findOne({ _id: ObjectId(workspaceId) })
-        .then((workspace) => {
-          if (!workspace) {
-            reject(new Error('Workspace not found'));
+        .collection(collections.PRODUCTS_COLLECTION)
+        .findOne({ _id: ObjectId(productId) })
+        .then((product) => {
+          if (!product) {
+            reject(new Error('Product not found'));
           } else {
-            // Assuming the workspace has a teacherId field
-            resolve(workspace);
+            // Assuming the product has a teacherId field
+            resolve(product);
           }
         })
         .catch((err) => {
@@ -477,24 +605,24 @@ module.exports = {
 
 
 
-  placeOrder: (order, workspace, total, user) => {
+  placeOrder: (order, product, total, user) => {
     return new Promise(async (resolve, reject) => {
       try {
-        console.log(order, workspace, total);
+        console.log(order, product, total);
         let status = order["payment-method"] === "COD" ? "placed" : "pending";
 
-        // Get the workspace document to check the current seat value
-        const workspaceDoc = await db.get()
-          .collection(collections.WORKSPACE_COLLECTION)
-          .findOne({ _id: objectId(workspace._id) });
+        // Get the product document to check the current seat value
+        const productDoc = await db.get()
+          .collection(collections.PRODUCTS_COLLECTION)
+          .findOne({ _id: objectId(product._id) });
 
-        // Check if the workspace exists and the seat field is present
-        if (!workspaceDoc || !workspaceDoc.seat) {
-          return reject(new Error("Workspace not found or seat field is missing."));
+        // Check if the product exists and the seat field is present
+        if (!productDoc || !productDoc.seat) {
+          return reject(new Error("Product not found or seat field is missing."));
         }
 
         // Convert seat from string to number and check availability
-        let seatCount = Number(workspaceDoc.seat);
+        let seatCount = Number(productDoc.seat);
         if (isNaN(seatCount) || seatCount <= 0) {
           return reject(new Error("Seat is not available."));
         }
@@ -515,11 +643,11 @@ module.exports = {
           userId: objectId(order.userId),
           user: user,
           paymentMethod: order["payment-method"],
-          workspace: workspace,
+          product: product,
           totalAmount: total,
           status: status,
           date: new Date(),
-          teacherId: workspace.teacherId, // Store the teacher's ID
+          teacherId: product.teacherId, // Store the teacher's ID
         };
 
         // Insert the order into the database
@@ -530,11 +658,11 @@ module.exports = {
         // Decrement the seat count
         seatCount -= 1; // Decrement the seat count
 
-        // Convert back to string and update the workspace seat count
+        // Convert back to string and update the product seat count
         await db.get()
-          .collection(collections.WORKSPACE_COLLECTION)
+          .collection(collections.PRODUCTS_COLLECTION)
           .updateOne(
-            { _id: objectId(workspace._id) },
+            { _id: objectId(product._id) },
             { $set: { seat: seatCount.toString() } } // Convert number back to string
           );
 
@@ -563,10 +691,10 @@ module.exports = {
     });
   },
 
-  getOrderWorkspaces: (orderId) => {
+  getOrderProducts: (orderId) => {
     return new Promise(async (resolve, reject) => {
       try {
-        let workspaces = await db
+        let products = await db
           .get()
           .collection(collections.ORDER_COLLECTION)
           .aggregate([
@@ -575,8 +703,8 @@ module.exports = {
             },
             {
               $project: {
-                // Include workspace, user, and other relevant fields
-                workspace: 1,
+                // Include product, user, and other relevant fields
+                product: 1,
                 user: 1,
                 paymentMethod: 1,
                 totalAmount: 1,
@@ -589,7 +717,7 @@ module.exports = {
           ])
           .toArray();
 
-        resolve(workspaces[0]); // Fetch the first (and likely only) order matching this ID
+        resolve(products[0]); // Fetch the first (and likely only) order matching this ID
       } catch (error) {
         reject(error);
       }

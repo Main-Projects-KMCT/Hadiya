@@ -78,6 +78,7 @@ app.use("/admin/users", adminRouter);
 app.use("/admin/teacher", adminRouter);
 app.use("/admin/subjects", adminRouter);
 app.use("/admin/timetables", adminRouter);
+app.use("/admin/leaves", adminRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

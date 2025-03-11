@@ -1,0 +1,73 @@
+<style>
+    .header {
+        background-color: black !important;
+    }
+</style>
+
+<main class="main pt-5">
+    <div class="container">
+        <br><br><br>
+        <div class="pagetitle">
+            <h1>My Attendance</h1>
+
+        </div><!-- End Page Title -->
+
+        <section id="services" class="services section">
+
+            <div class="row">
+                <div class="col-lg-12">
+                    <a href="/" class="btn btn-dark btn-sm">Back</a>
+                    <div class="card shadow mt-3">
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table datatable table-bordered border">
+                                    <thead>
+                                        <tr>
+                                            <th>No.</th>
+                                            <th data-type="date" data-format="YYYY/DD/MM"> Date</th>
+                                            <th>Subject Details</th>
+                                            {{!-- <th>Attended Students</th> --}}
+
+                                            {{!-- <th>Manage</th> --}}
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {{#each attendance}}
+                                        <tr>
+                                            <td>{{incremented @index}}</td>
+                                            <td>{{formatDate this.date}}</td>
+                                            <td>
+                                                {{!-- <p class="mb-0"><b>Teacher : </b> {{this.teacherName}}</p> --}}
+                                                <p class="mb-0"><b>Subject : </b> {{this.subject}}</p>
+                                            </td>
+                                            {{!-- <td> {{#each selectedUsers}}
+                                                {{this}} ,
+                                                {{else}}
+                                                <li>No users selected</li>
+                                                {{/each}}
+                                            </td> --}}
+
+                                            {{!-- <td>
+                                                <div class="d-flex gap-2">
+
+                                                    <form action="/admin/delete-attendance/{{this._id}}" method="POST">
+                                                        <button type="submit" class="btn btn-danger btn-sm"><i
+                                                                class="bi bi-trash"></i></button>
+                                                    </form>
+                                                </div>
+                                            </td> --}}
+
+                                        </tr>
+                                        {{/each}}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+
+                </div>
+            </div>
+        </section>
+    </div>
+</main><!-- End #main -->

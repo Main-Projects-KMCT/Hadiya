@@ -218,14 +218,8 @@ router.get("/add-product", verifySignedIn, function (req, res) {
 
 router.post("/add-product", function (req, res) {
   adminHelper.addProduct(req.body, (id) => {
-    let image = req.files.Image;
-    image.mv("./public/images/product-images/" + id + ".png", (err, done) => {
-      if (!err) {
-        res.redirect("/admin/add-product");
-      } else {
-        console.log(err);
-      }
-    });
+    res.redirect("/admin/all-products");
+
   });
 });
 
@@ -253,7 +247,6 @@ router.post("/edit-product/:id", verifySignedIn, function (req, res) {
 router.get("/delete-product/:id", verifySignedIn, function (req, res) {
   let productId = req.params.id;
   adminHelper.deleteProduct(productId).then((response) => {
-    fs.unlinkSync("./public/images/product-images/" + productId + ".png");
     res.redirect("/admin/all-products");
   });
 });
@@ -270,6 +263,25 @@ router.get("/all-users", verifySignedIn, function (req, res) {
     res.render("admin/users/all-users", { admin: true, layout: "admin-layout", administator, users });
   });
 });
+
+
+
+router.get("/all-t-leave", verifySignedIn, function (req, res) {
+  let administator = req.session.admin;
+  adminHelper.getAllTleaves().then((tleaves) => {
+    res.render("admin/leaves/all-t-leave", { admin: true, layout: "admin-layout", administator, tleaves });
+  });
+});
+
+
+
+router.get("/all-s-leave", verifySignedIn, function (req, res) {
+  let administator = req.session.admin;
+  adminHelper.getAllSleaves().then((sleaves) => {
+    res.render("admin/leaves/all-s-leave", { admin: true, layout: "admin-layout", administator, sleaves });
+  });
+});
+
 
 router.post("/block-user/:id", (req, res) => {
   const userId = req.params.id;
@@ -341,6 +353,25 @@ router.get("/change-status/", verifySignedIn, function (req, res) {
     res.redirect("/admin/all-orders");
   });
 });
+
+
+router.get("/change-status-leave/", verifySignedIn, function (req, res) {
+  let status = req.query.status;
+  let tleaveId = req.query.tleaveId;
+  adminHelper.changeStatusLeave(status, tleaveId).then(() => {
+    res.redirect("/admin/leaves/all-t-leave");
+  });
+});
+
+
+router.get("/change-status-leave-s/", verifySignedIn, function (req, res) {
+  let status = req.query.status;
+  let sleaveId = req.query.sleaveId;
+  adminHelper.changeStatusLeaveS(status, sleaveId).then(() => {
+    res.redirect("/admin/leaves/all-s-leave");
+  });
+});
+
 
 router.get("/cancel-order/:id", verifySignedIn, function (req, res) {
   let orderId = req.params.id;
