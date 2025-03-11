@@ -7,6 +7,10 @@
         label {
             font-size: 13px;
         }
+
+        td {
+            margin-bottom: 20px;
+        }
     </style>
     <div class="container">
 
@@ -23,62 +27,28 @@
 
                 <div class="card shadow p-4">
 
-                    <form action="/teacher/submit-attendance" method="POST" enctype="multipart/form-data"
-                        autocomplete="off">
+                    <form action="/teacher/attendance" method="POST" enctype="multipart/form-data" autocomplete="off">
                         <input type="hidden" name="date" id="datetime">
 
                         <div class="form-group">
                             <label for="">Your Subject</label>
                             <input class="form-control" type="text" name="subject"
-                                value="{{teacher.subjectDetails.sname}}" readonly>
+                                value="{{teacher.subjectDetails.sname}}">
                             <input class="form-control" type="hidden" name="subjectId"
                                 value="{{teacher.subjectDetails._id}}">
                             <input class="form-control" type="hidden" name="teacherId" value="{{teacher._id}}">
-
-                            <label for="" class="mt-2">Date</label>
-                            <input class="form-control" type="date" name="selectedDate" required>
-
-                            <label for="" class="mt-2">Select Period</label>
-                            <select class="form-control" name="period" aria-label="Default select example" required>
-                                <option selected>Period</option>
-                                <option value="1">P1</option>
-                                <option value="2">P2</option>
-                                <option value="3">P3</option>
-                                <option value="4">P4</option>
-                                <option value="5">P5</option>
-                                <option value="6">P6</option>
-                                <option value="7">P7</option>
-                                <option value="8">P8</option>
-                                <option value="9">P9</option>
-                                <option value="10">P10</option>
-                            </select>
-
-
-                            <label for="" class="mt-2">Class</label>
-                            <input class="form-control" type="text" name="Class" placeholder="Enter Class Number/Name"
-                                required>
-
                         </div>
 
                         <p class="mb-0">Check the students if they are present</p>
                         <hr class="mb-0">
 
-                        <table class="mt-0 table table-bordered" style="">
+                        <table>
                             <tbody>
-                                <th>Present</th>
-                                <th>Absent</th>
-                                <th>Student</th>
                                 {{#each users}}
-
-
                                 <tr>
                                     <td>
                                         <!-- Checkbox for each user -->
-                                        <input type="checkbox" name="present" value="{{this._id}}">
-                                    </td>
-                                    <td>
-                                        <!-- Checkbox for each user -->
-                                        <input type="checkbox" name="absent" value="{{this._id}}">
+                                        <input type="checkbox" name="selectedUsers" value="{{this._id}}">
                                     </td>
                                     <td>{{this.Fname}} {{this.Lname}}</td>
                                 </tr> <br>

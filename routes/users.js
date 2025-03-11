@@ -1,9 +1,6 @@
 var express = require("express");
 var userHelper = require("../helper/userHelper");
 var teacherHelper = require("../helper/teacherHelper");
-var adminHelper = require("../helper/adminHelper");
-var fs = require("fs");
-const path = require("path");
 
 var router = express.Router();
 var db = require("../config/connection");
@@ -21,35 +18,16 @@ const verifySignedIn = (req, res, next) => {
 /* GET home page. */
 router.get("/", async function (req, res, next) {
   let user = req.session.user;
-  userHelper.getAllproducts().then((products) => {
-    res.render("users/home", { admin: false, products, user });
+  userHelper.getAllworkspaces().then((workspaces) => {
+    res.render("users/home", { admin: false, workspaces, user });
   });
 });
 
 
 router.get("/dashboard", verifySignedIn, async function (req, res, next) {
   let user = req.session.user;
-  userHelper.getAllproducts().then((products) => {
-    res.render("users/dashboard/home", { admin: false, products, user });
-  });
-});
-
-
-
-router.get("/leave", verifySignedIn, async function (req, res, next) {
-  let user = req.session.user;
-  if (!user || !user._id) {
-    return res.status(403).send("Unauthorized");
-  }
-  const leaves = await userHelper.getleavesById(user._id);  // ✅ Pass user ID
-  res.render("users/leave", { admin: false, leaves, user });
-
-});
-
-router.post("/add-leave", function (req, res) {
-  userHelper.addLeave(req.body, (id) => {
-    res.redirect("/leave");
-
+  userHelper.getAllworkspaces().then((workspaces) => {
+    res.render("users/dashboard/home", { admin: false, workspaces, user });
   });
 });
 
@@ -81,14 +59,16 @@ router.get("/attendance", verifySignedIn, async function (req, res) {
 
 
 
-
-router.get("/notifications", verifySignedIn, async function (req, res) {
+router.get("/notifications", verifySignedIn, function (req, res) {
   let user = req.session.user;  // Get logged-in user from session
 
-  let notifications = await userHelper.getnotificationById(user._id)
-  let products = await userHelper.getAllProducts()
-
-  res.render("users/notifications", { admin: false, notifications, user, products });
+  // Use the user._id to fetch notifications for the logged-in user
+  userHelper.getnotificationById(user._id).then((notifications) => {
+    res.render("users/notifications", { admin: false, notifications, user });
+  }).catch((err) => {
+    console.error("Error fetching notifications:", err);
+    res.status(500).send("Error fetching notifications");
+  });
 });
 
 router.get("/about", async function (req, res) {
@@ -109,7 +89,7 @@ router.post("/add-feedback", async function (req, res) {
   let user = req.session.user; // Ensure the user is logged in and the session is set
   let feedbackText = req.body.text; // Get feedback text from form input
   let username = req.body.username; // Get username from form input
-  let productId = req.body.productId; // Get product ID from form input
+  let workspaceId = req.body.workspaceId; // Get workspace ID from form input
   let teacherId = req.body.teacherId; // Get teacher ID from form input
 
   if (!user) {
@@ -119,7 +99,7 @@ router.post("/add-feedback", async function (req, res) {
   try {
     const feedback = {
       userId: ObjectId(user._id), // Convert user ID to ObjectId
-      productId: ObjectId(productId), // Convert product ID to ObjectId
+      workspaceId: ObjectId(workspaceId), // Convert workspace ID to ObjectId
       teacherId: ObjectId(teacherId), // Convert teacher ID to ObjectId
       text: feedbackText,
       username: username,
@@ -127,7 +107,7 @@ router.post("/add-feedback", async function (req, res) {
     };
 
     await userHelper.addFeedback(feedback);
-    res.redirect("/single-product/" + productId); // Redirect back to the product page
+    res.redirect("/single-workspace/" + workspaceId); // Redirect back to the workspace page
   } catch (error) {
     console.error("Error adding feedback:", error);
     res.status(500).send("Server Error");
@@ -136,26 +116,26 @@ router.post("/add-feedback", async function (req, res) {
 
 
 
-router.get("/single-product/:id", async function (req, res) {
+router.get("/single-workspace/:id", async function (req, res) {
   let user = req.session.user;
-  const productId = req.params.id;
+  const workspaceId = req.params.id;
 
   try {
-    const product = await userHelper.getProductById(productId);
+    const workspace = await userHelper.getWorkspaceById(workspaceId);
 
-    if (!product) {
-      return res.status(404).send("Product not found");
+    if (!workspace) {
+      return res.status(404).send("Workspace not found");
     }
-    const feedbacks = await userHelper.getFeedbackByProductId(productId); // Fetch feedbacks for the specific product
+    const feedbacks = await userHelper.getFeedbackByWorkspaceId(workspaceId); // Fetch feedbacks for the specific workspace
 
-    res.render("users/single-product", {
+    res.render("users/single-workspace", {
       admin: false,
       user,
-      product,
+      workspace,
       feedbacks
     });
   } catch (error) {
-    console.error("Error fetching product:", error);
+    console.error("Error fetching workspace:", error);
     res.status(500).send("Server Error");
   }
 });
@@ -410,37 +390,37 @@ router.post("/edit-profile/:id", verifySignedIn, async function (req, res) {
 
 
 router.get('/place-order/:id', verifySignedIn, async (req, res) => {
-  const productId = req.params.id;
+  const workspaceId = req.params.id;
 
-  // Validate the product ID
-  if (!ObjectId.isValid(productId)) {
-    return res.status(400).send('Invalid product ID format');
+  // Validate the workspace ID
+  if (!ObjectId.isValid(workspaceId)) {
+    return res.status(400).send('Invalid workspace ID format');
   }
 
   let user = req.session.user;
 
   // Fetch the product details by ID
-  let product = await userHelper.getProductDetails(productId);
+  let workspace = await userHelper.getWorkspaceDetails(workspaceId);
 
-  // If no product is found, handle the error
-  if (!product) {
-    return res.status(404).send('Product not found');
+  // If no workspace is found, handle the error
+  if (!workspace) {
+    return res.status(404).send('Workspace not found');
   }
 
-  // Render the place-order page with product details
-  res.render('users/place-order', { user, product });
+  // Render the place-order page with workspace details
+  res.render('users/place-order', { user, workspace });
 });
 
 router.post('/place-order', async (req, res) => {
   let user = req.session.user;
-  let productId = req.body.productId;
+  let workspaceId = req.body.workspaceId;
 
-  // Fetch product details
-  let product = await userHelper.getProductDetails(productId);
-  let totalPrice = product.Price; // Get the price from the product
+  // Fetch workspace details
+  let workspace = await userHelper.getWorkspaceDetails(workspaceId);
+  let totalPrice = workspace.Price; // Get the price from the workspace
 
   // Call placeOrder function
-  userHelper.placeOrder(req.body, product, totalPrice, user)
+  userHelper.placeOrder(req.body, workspace, totalPrice, user)
     .then((orderId) => {
       if (req.body["payment-method"] === "COD") {
         res.json({ codSuccess: true });
@@ -487,7 +467,7 @@ router.get("/orders", verifySignedIn, async function (req, res) {
   res.render("users/orders", { admin: false, user, orders });
 });
 
-router.get("/view-ordered-products/:id", verifySignedIn, async function (req, res) {
+router.get("/view-ordered-workspaces/:id", verifySignedIn, async function (req, res) {
   let user = req.session.user;
   let orderId = req.params.id;
 
@@ -501,14 +481,14 @@ router.get("/view-ordered-products/:id", verifySignedIn, async function (req, re
   }
 
   try {
-    let products = await userHelper.getOrderProducts(orderId);
-    res.render("users/order-products", {
+    let workspaces = await userHelper.getOrderWorkspaces(orderId);
+    res.render("users/order-workspaces", {
       admin: false,
       user,
-      products,
+      workspaces,
     });
   } catch (err) {
-    console.error('Error fetching ordered products:', err);
+    console.error('Error fetching ordered workspaces:', err);
     res.status(500).send('Internal Server Error');
   }
 });
@@ -529,151 +509,6 @@ router.post("/search", verifySignedIn, async function (req, res) {
   userHelper.searchProduct(req.body).then((response) => {
     res.render("users/search-result", { admin: false, user, response });
   });
-});
-
-
-router.get("/attendance", verifySignedIn, async function (req, res) {
-  try {
-    let user = req.session.user;
-    if (!user || !user._id) {
-      return res.status(403).send("Unauthorized");
-    }
-    const attendanceData = await userHelper.getAllattendancebyid(user._id);  // ✅ Pass user ID
-
-    console.log("Attendance Data:", JSON.stringify(attendanceData, null, 2)); // Debugging
-
-    res.render("users/dashboard/attendance", {
-      admin: false,
-      layout: 'layout',
-      attendance: attendanceData,
-      user
-    });
-
-  } catch (error) {
-    console.error("Error fetching attendance:", error);
-    res.status(500).send("Internal Server Error");
-  }
-});
-
-
-
-router.get("/timetable", verifySignedIn, async function (req, res) {
-  let user = req.session.user;
-  let timetables = await adminHelper.getAllTimetables();
-  let teachers = await adminHelper.getAllteachers();
-
-  res.render("users/dashboard/timetable", { admin: false, timetables, user, teachers });
-});
-
-
-
-
-router.get("/tasks", verifySignedIn, function (req, res) {
-  let user = req.session.user;
-  userHelper.getAlltasks().then((tasks) => {
-    res.render("users/tasks", { admin: false, tasks, user });
-  });
-});
-
-router.get("/view-task/:id", verifySignedIn, async function (req, res) {
-  let user = req.session.user;
-  const taskId = req.params.id;
-
-  try {
-    const task = await userHelper.getTaskById(taskId);
-
-    const feedbacks = await userHelper.getFeedbackByTaskId(taskId); // Fetch feedbacks for the specific task
-
-
-    if (!task) {
-      return res.status(404).send("Task not found");
-    }
-
-    res.render("users/view-task", {
-      admin: false,
-      user,
-      task,
-      feedbacks,
-    });
-  } catch (error) {
-    console.error("Error fetching task:", error);
-    res.status(500).send("Server Error");
-  }
-});
-
-
-
-
-router.post("/add-assignment", async function (req, res) {
-  let user = req.session.user; // Ensure the user is logged in and the session is set
-  let feedbackText = req.body.text; // Get feedback text from form input
-  let username = req.body.username; // Get username from form input
-  let taskId = req.body.taskId; // Get task ID from form input
-  let teacherId = req.body.teacherId; // Get teacher ID from form input
-
-  if (!user) {
-    return res.status(403).send("User not logged in");
-  }
-
-  try {
-    const feedback = {
-      userId: ObjectId(user._id), // Convert user ID to ObjectId
-      taskId: ObjectId(taskId), // Convert task ID to ObjectId
-      teacherId: ObjectId(teacherId), // Convert teacher ID to ObjectId
-      text: feedbackText,
-      username: username,
-      createdAt: new Date(), // Store the timestamp
-      image: "", // Placeholder for image path
-    };
-
-    // Check if an image file is uploaded
-    if (req.files && req.files.image) {
-      let image = req.files.image;
-      let imagePath = "./public/images/assignment-images/" + new ObjectId() + path.extname(image.name);
-
-      // Ensure the directory exists
-      let dir = "./public/images/assignment-images/";
-      if (!fs.existsSync(dir)) {
-        fs.mkdirSync(dir, { recursive: true });
-      }
-
-      // Move the file to the destination
-      await image.mv(imagePath);
-      feedback.image = imagePath.replace("./public", ""); // Store relative path
-    }
-
-    await userHelper.addFeedback(feedback);
-    res.redirect("/view-task/" + taskId); // Redirect back to the task page
-  } catch (error) {
-    console.error("Error adding feedback:", error);
-    res.status(500).send("Server Error");
-  }
-});
-
-
-
-router.get("/single-task/:id", async function (req, res) {
-  let user = req.session.user;
-  const taskId = req.params.id;
-
-  try {
-    const task = await userHelper.getTaskById(taskId);
-
-    if (!task) {
-      return res.status(404).send("Task not found");
-    }
-    const feedbacks = await userHelper.getFeedbackByTaskId(taskId); // Fetch feedbacks for the specific task
-
-    res.render("users/single-task", {
-      admin: false,
-      user,
-      task,
-      feedbacks
-    });
-  } catch (error) {
-    console.error("Error fetching task:", error);
-    res.status(500).send("Server Error");
-  }
 });
 
 module.exports = router;

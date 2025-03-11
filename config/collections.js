@@ -12,9 +12,5 @@ module.exports = {
     ATTENDANCE_COLLECTION: 'attendance',
     TIMETABLE_COLLECTION: "time-table",
     MATERIAL_COLLECTION: 'materials',
-    TASK_COLLECTION: "assignments",
-    LEAVE_COLLECTION: "std-leave",
-    TLEAVE_COLLECTION: "thr-leave",
-    EXAM_COLLECTION: "exam"
 
 }
