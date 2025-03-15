@@ -1,7 +1,7 @@
 <main id="main" class="main">
 
     <div class="pagetitle">
-        <h1>Manage Subjects</h1>
+        <h1>Manage Subject</h1>
         <nav>
             <ol class="breadcrumb">
                 <li class="breadcrumb-item"><a href="/admin">Dashboard</a></li>
@@ -17,20 +17,19 @@
 
                 <div class="card">
                     <div class="card-body">
-                        <h5 class="card-title">All Subjects</h5>
-                        <button type="button" class="btn btn-primary mb-4" data-toggle="modal"
-                            data-target="#exampleModalCenter">
-                            + Add Subject
-                        </button>
+                        <h5 class="card-title">All Subject</h5>
+
+
+
                         <div class="table-responsive">
+                            <!-- Table with stripped rows -->
                             <table class="table datatable">
                                 <thead>
                                     <tr>
                                         <th>No.</th>
-
-                                        <th>Subject Name</th>
-                                        {{!-- <th>Subject Code</th> --}}
+                                        <th>Name</th>
                                         <th>Teacher</th>
+                                        <th>Status</th>
                                         <th>Manage</th>
                                     </tr>
                                 </thead>
@@ -38,11 +37,10 @@
                                     {{#each subjects}}
                                     <tr>
                                         <td>{{incremented @index}}</td>
-
                                         <td>{{this.sname}} </td>
-                                        {{!-- <td>{{this.scode}}</td> --}}
                                         <td>{{this.teacher}}</td>
-
+                                        <td >Active</td>
+                                      
                                         <td>
                                             <div class="d-flex gap-2">
 
@@ -53,22 +51,21 @@
                                                 </form>
                                             </div>
                                         </td>
-
                                     </tr>
                                     {{/each}}
                                 </tbody>
                             </table>
                         </div>
+                        <!-- End Table with stripped rows -->
+
                     </div>
                 </div>
-
 
             </div>
         </div>
     </section>
 
 </main><!-- End #main -->
-
 
 <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle"
     aria-hidden="true">
@@ -112,3 +109,53 @@
         </div>
     </div>
 </div>
+<!-- jQuery -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+<!-- Bootstrap JS -->
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+<script>
+    let userIdToBlock = null;
+
+    function setUserIdToBlock(userId) {
+        userIdToBlock = userId;
+    }
+
+</script>
+<script>
+    function blockUser() {
+        const reason = document.getElementById("blockReason").value;
+
+        if (reason.trim() === "") {
+            alert("Please enter a reason for blocking.");
+            return;
+        }
+
+        // Send a request to the server to block the user
+        fetch(`/admin/block-user/${userIdToBlock}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                reason: reason,
+            }),
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Close the modal
+                    $('#blockModal').modal('hide');
+                    alert('User blocked successfully');
+                    // You can also reload the page or update the UI
+                    location.reload();
+                } else {
+                    alert('Failed to block the user');
+                }
+            })
+            .catch(error => {
+                console.error('Error blocking user:', error);
+            });
+    }
+</script>

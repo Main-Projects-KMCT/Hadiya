@@ -125,6 +125,40 @@ module.exports = {
     });
   },
 
+  getAllteachersWithSubject: () => {
+    return new Promise(async (resolve, reject) => {
+      let teachers = await db
+        .get()
+        .collection(collections.TEACHER_COLLECTION)
+        .aggregate([
+          {
+              $lookup: {
+                  from: "subjects",  // Name of the subjects collection
+                  localField: "_id", // Teacher's _id in teachers collection
+                  foreignField: "teacher", // Reference in subjects collection
+                  as: "subjectInfo"
+              }
+          },
+          {
+              $unwind: {
+                  path: "$subjectInfo", // Unwind subject data (if multiple subjects exist)
+                  preserveNullAndEmptyArrays: true // Keep teachers without subjects
+              }
+          },
+          {
+              $project: {
+                  _id: 1,
+                  Name: 1,
+                  Email: 1,
+                  "sname": "$subjectInfo.sname" // Rename subject field
+              }
+          }
+      ]).toArray()
+      
+      resolve(teachers);
+    });
+  },
+
   ///////ADD teacher DETAILS/////////////////////                                            
   getteacherDetails: (teacherId) => {
     return new Promise((resolve, reject) => {
@@ -313,7 +347,35 @@ module.exports = {
         });
     });
   },
+  getUserById:async (id)=>{
+    return new Promise(async (resolve, reject) => {
+      try {
+        const users = await db
+          .get()
+          .collection(collections.USERS_COLLECTION)
+          .findOne( { _id: objectId(id) })
 
+        resolve(users);
+      } catch (err) {
+        reject(err);  // Handle any error during fetching
+      }
+    });
+
+  },
+  getTeacherById:async (id)=>{
+    return new Promise(async (resolve, reject) => {
+      try {
+        const users = await db
+          .get()
+          .collection(collections.TEACHER_COLLECTION)
+          .findOne( { _id: objectId(id) })
+
+        resolve(users);
+      } catch (err) {
+        reject(err);  // Handle any error during fetching
+      }
+    });
+  },  
   getAllUsers: () => {
     return new Promise(async (resolve, reject) => {
       try {
@@ -330,9 +392,6 @@ module.exports = {
       }
     });
   },
-
-
-
 
   getAllTleaves: () => {
     return new Promise(async (resolve, reject) => {

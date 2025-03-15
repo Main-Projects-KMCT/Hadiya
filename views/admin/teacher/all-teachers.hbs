@@ -58,10 +58,21 @@
                                                             class="bi bi-ban"></i></button>
                                                 </form>
                                                 {{/if}}
-                                                <form action="/admin/delete-teacher/{{this._id}}" method="POST">
-                                                    <button type="submit" class="btn btn-danger btn-sm"><i
-                                                            class="bi bi-trash"></i></button>
-                                                </form>
+                                           {{#if this.isDisable}}
+                                        <td>
+                                            <button class="btn btn-secondary btn-sm" disabled>Blocked</button>
+                                            <a href="/admin/view-teacher/{{this._id}}" class="btn btn-primary btn-sm" >view</a>
+                                        </td>
+                                        {{else}}
+                                        <td>
+                                            <a href="#" class="btn btn-danger btn-sm" data-bs-toggle="modal"
+                                                data-bs-target="#blockModal"
+                                                onclick="setUserIdToBlock('{{this._id}}')">Block</a>
+                                            <a href="/admin/view-teacher/{{this._id}}" class="btn btn-primary btn-sm" >view</a>
+                                        </td>
+                                        
+                                        {{/if}}
+                                       
                                             </div>
                                         </td>
 
@@ -78,4 +89,67 @@
         </div>
     </section>
 
+    <div class="modal fade" id="blockModal" tabindex="-1" aria-labelledby="blockModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="blockModalLabel">Block Teacher</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <textarea id="blockReason" class="form-control" rows="4"
+                    placeholder="Enter reason for blocking..."></textarea>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-danger" onclick="blockUser()">Block Teacher</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 </main><!-- End #main -->
+<script>
+    let userIdToBlock = null;
+
+    function setUserIdToBlock(userId) {
+        userIdToBlock = userId;
+    }
+
+</script>
+<script>
+    function blockUser() {
+        const reason = document.getElementById("blockReason").value;
+
+        if (reason.trim() === "") {
+            alert("Please enter a reason for blocking.");
+            return;
+        }
+
+        // Send a request to the server to block the user
+        fetch(`/admin/block-teacher/${userIdToBlock}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                reason: reason,
+            }),
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Close the modal
+                    $('#blockModal').modal('hide');
+                    alert('Teacher blocked successfully');
+                    // You can also reload the page or update the UI
+                    location.reload();
+                } else {
+                    alert('Failed to block the user');
+                }
+            })
+            .catch(error => {
+                console.error('Error blocking user:', error);
+            });
+    }
+</script>

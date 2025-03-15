@@ -263,6 +263,22 @@ router.get("/all-users", verifySignedIn, function (req, res) {
     res.render("admin/users/all-users", { admin: true, layout: "admin-layout", administator, users });
   });
 });
+router.get("/view-user/:id", verifySignedIn, function (req, res) {
+  let administator = req.session.admin;
+  let id=req.params.id;
+  adminHelper.getUserById(id).then((users) => {
+    res.render("admin/users/view-user", { admin: true, layout: "admin-layout", administator, users });
+  });
+});
+
+router.get("/view-teacher/:id", verifySignedIn, function (req, res) {
+  let administator = req.session.admin;
+  let id=req.params.id;
+  adminHelper.getTeacherById(id).then((users) => {
+    res.render("admin/teacher/view-teacher", { admin: true, layout: "admin-layout", administator, users });
+  });
+});
+
 
 
 
@@ -281,6 +297,23 @@ router.get("/all-s-leave", verifySignedIn, function (req, res) {
     res.render("admin/leaves/all-s-leave", { admin: true, layout: "admin-layout", administator, sleaves });
   });
 });
+router.post("/block-teacher/:id", (req, res) => {
+  const userId = req.params.id;
+  const { reason } = req.body;
+
+  // Update the user in the database to set isDisable to true and add the reason
+  db.get()
+    .collection(collections.TEACHER_COLLECTION)
+    .updateOne(
+      { _id: new ObjectId(userId) },
+      { $set: { isDisable: true, reason: reason } }
+    )
+    .then(() => res.json({ success: true }))
+    .catch(err => {
+      console.error('Error blocking user:', err);
+      res.json({ success: false });
+    });
+});
 
 
 router.post("/block-user/:id", (req, res) => {
@@ -292,7 +325,7 @@ router.post("/block-user/:id", (req, res) => {
     .collection(collections.USERS_COLLECTION)
     .updateOne(
       { _id: new ObjectId(userId) },
-      { $set: { isDisable: true, blockReason: reason } }
+      { $set: { isDisable: true, reason: reason } }
     )
     .then(() => res.json({ success: true }))
     .catch(err => {
@@ -423,7 +456,8 @@ router.post("/delete-subject/:id", verifySignedIn, async function (req, res) {
 router.get("/all-timetables", verifySignedIn, async function (req, res) {
   let administator = req.session.admin;
   let timetables = await adminHelper.getAllTimetables();
-  let teachers = await adminHelper.getAllteachers();
+  let teachers = await adminHelper.getAllteachersWithSubject();
+  console.log("_____",teachers,"*****")
 
   res.render("admin/timetables/all-timetables", { admin: true, layout: "admin-layout", timetables, administator, teachers });
 });

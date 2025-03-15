@@ -6,7 +6,7 @@
             <ol class="breadcrumb">
                 <li class="breadcrumb-item"><a href="/admin">Dashboard</a></li>
                 <li class="breadcrumb-item">Users</li>
-                <li class="breadcrumb-item active">All-Users</li>
+                <li class="breadcrumb-item active">view Users</li>
             </ol>
         </nav>
     </div><!-- End Page Title -->
@@ -17,48 +17,54 @@
 
                 <div class="card">
                     <div class="card-body">
-                        <h5 class="card-title">All Users</h5>
+                        <h5 class="card-title">View Users</h5>
 
 
 
-                        <div class="table-responsive">
-                            <!-- Table with stripped rows -->
-                            <table class="table datatable">
+                        
+                    <table class="table responsive border table-bordered">
+                        <thead class="table-dark">
                                 <thead>
                                     <tr>
-                                        <th>No.</th>
-                                        <th data-type="date" data-format="YYYY/DD/MM">Joined Date</th>
                                         <th>Name</th>
+                                        <th>Email</th>
                                         <th>Phone</th>
                                         <th>Address</th>
-                                        <th>Manage</th>
+                                        <th>District</th>
+                                        <th>Role</th>
+                                        <th>Status</th>
+                                        <th>Blocked Reason</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {{#each users}}
+                               
                                     <tr>
-                                        <td>{{incremented @index}}</td>
-                                        <td>{{this.date}}</td>
-                                        <td>{{this.Fname}} {{this.Lname}}</td>
-                                        <td>{{this.Phone}}</td>
-                                        <td>{{this.Address}}</td>
-                                      
-                                        {{#if this.isDisable}}
+                                        <td>{{users.Name}}</td>
+                                        <td>{{users.Email}}</td>
+                                        <td>{{users.Phone}}</td>
+                                        <td>{{users.Address}}</td>
+                                        <td>{{users.District}}</td>
+                                        <td>{{users.role}}</td>
+                                        {{#if users.isDisable}}
                                         <td>
-                                            <button class="btn btn-secondary btn-sm" disabled>Blocked</button>
-                                            <a href="/admin/view-user/{{this._id}}" class="btn btn-primary btn-sm" >view</a>
+                                            Blocked
+                                        </td>
+                                        <td>
+                                          {{users.reason}}
                                         </td>
                                         {{else}}
                                         <td>
-                                            <a href="#" class="btn btn-danger btn-sm" data-bs-toggle="modal"
-                                                data-bs-target="#blockModal"
-                                                onclick="setUserIdToBlock('{{this._id}}')">Block</a>
-                                            <a href="/admin/view-user/{{this._id}}" class="btn btn-primary btn-sm" >view</a>
+                                           Active
+                                        </td>
+                                        <td>
+                                          {{users.reason}}
                                         </td>
                                         
                                         {{/if}}
+
                                     </tr>
-                                    {{/each}}
+
+                                    
                                 </tbody>
                             </table>
                         </div>
