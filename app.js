@@ -45,6 +45,9 @@ app.engine(
         const year = date.getFullYear();
         return `${day}-${month}-${year}`; // Return the formatted date
       },
+      json:function (context) {
+        return JSON.stringify(context);
+    }
     },
   })
 );

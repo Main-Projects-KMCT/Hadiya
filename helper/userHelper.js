@@ -243,6 +243,125 @@ module.exports = {
       }
     });
   },
+  getSubjectWiseAttendance:async (userId, className,sem) =>{
+    try {
+      const attendanceCollection = await db.get().collection(collections.ATTENDANCE_COLLECTION)
+
+      const results = await attendanceCollection.aggregate([
+          {
+              $match: {
+                  sem:sem,
+                  Class: className, // Filter by class
+                  $or: [
+                      { present: { $elemMatch: { $eq: ObjectId(userId) } } },
+                      { absent: { $elemMatch: { $eq: ObjectId(userId) } } }
+                  ]
+              }
+          },
+          {
+              $group: {
+                  _id: { subject: "$subject", teacherId: "$teacherId", subjectId: "$subjectId" },
+                  totalClass: { $sum: 1 }, // Count total classes
+                  attendedclass: {
+                      $sum: {
+                          $cond: [{ $in: [ObjectId(userId), "$present"] }, 1, 0]
+                      }
+                  } // Count attended classes
+              }
+          },
+          {
+              $project: {
+                  _id: 0,
+                  subject: "$_id.subject",
+                  teacherId: "$_id.teacherId",
+                  subjectId: "$_id.subjectId",
+                  sem:sem,
+                  totalClass: 1,
+                  attendedclass: 1,
+                  percentage: {
+                      $round: [{ $multiply: [{ $divide: ["$attendedclass", "$totalClass"] }, 100] }, 2]
+                  } // Calculate attendance percentage
+              }
+          }
+      ]).toArray();
+
+      return results;
+  } catch (error) {
+      console.error("Error in getSubjectWiseAttendance:", error);
+      throw error;
+  }
+
+  },
+  getDayWiseAttendance:async (userId, className,sem) =>{
+    try {
+      const attendanceCollection = await db.get().collection(collections.ATTENDANCE_COLLECTION)
+
+      const results = await attendanceCollection.aggregate([
+        {
+            $match: {
+                Class: className,
+                $or: [
+                    { present: ObjectId(userId) },
+                    { absent: ObjectId(userId) }
+                ]
+            }
+        },
+        {
+            $group: {
+                _id: {
+                    date: "$selectedDate",
+                    subject: "$subject",
+                    teacherId: "$teacherId",
+                    subjectId: "$subjectId"
+                },
+                totalClasses: { $sum: 1 }, // Count total classes per subject
+                attendedClasses: {
+                    $sum: {
+                        $cond: [{ $in: [ObjectId(userId), "$present"] }, 1, 0]
+                    }
+                }
+            }
+        },
+        {
+            $group: {
+                _id: "$_id.date",
+                subjects: {
+                    $push: {
+                        subject: "$_id.subject",
+                        teacherId: "$_id.teacherId",
+                        subjectId: "$_id.subjectId",
+                        present: { $gt: ["$attendedClasses", 0] },
+                        totalClasses: "$totalClasses",
+                        attendedClasses: "$attendedClasses",
+                        percentage: {
+                            $multiply: [
+                                { $divide: ["$attendedClasses", "$totalClasses"] },
+                                100
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        {
+            $project: {
+                _id: 0,
+                date: "$_id",
+                subjects: 1,
+                present: { $gt: [{ $size: { $filter: { input: "$subjects", as: "s", cond: "$$s.present" } } }, 0] }
+            }
+        },
+        { $sort: { date: 1 } }
+    ]).toArray();
+
+
+      return results;
+  } catch (error) {
+      console.error("Error in getSubjectWiseAttendance:", error);
+      throw error;
+  }
+
+  },
   getnotificationById: (userId) => {
     return new Promise(async (resolve, reject) => {
       try {

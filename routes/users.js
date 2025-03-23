@@ -79,7 +79,54 @@ router.get("/attendance", verifySignedIn, async function (req, res) {
   }
 });
 
+router.get("/attendance/subjectwise", verifySignedIn, async function (req, res) {
+  try {
+    let user = req.session.user;
+    if (!user || !user._id) {
+      return res.status(403).send("Unauthorized");
+    }
+    const { userId, class: className ,sem} = req.query;
 
+     const attendanceData = await userHelper.getSubjectWiseAttendance(userId, className,sem);
+
+    console.log("Attendance Data:", JSON.stringify(attendanceData, null, 2)); // Debugging
+
+    res.render("users/dashboard/subwise-attendance", {
+      admin: false,
+      layout: 'layout',
+      attendance: attendanceData,
+      user
+    });
+
+  } catch (error) {
+    console.error("Error fetching attendance:", error);
+    res.status(500).send("Internal Server Error");
+  }
+});
+router.get("/attendance/daywise", verifySignedIn, async function (req, res) {
+  try {
+    let user = req.session.user;
+    if (!user || !user._id) {
+      return res.status(403).send("Unauthorized");
+    }
+    const { userId, class: className ,sem} = req.query;
+
+     const attendanceData = await userHelper.getDayWiseAttendance(userId, className,sem);
+
+    console.log("Attendance Data:", JSON.stringify(attendanceData, null, 2)); // Debugging
+
+    res.render("users/dashboard/daywise-attendance", {
+      admin: false,
+      layout: 'layout',
+      attendance: attendanceData,
+      user
+    });
+
+  } catch (error) {
+    console.error("Error fetching attendance:", error);
+    res.status(500).send("Internal Server Error");
+  }
+});
 
 
 router.get("/notifications", verifySignedIn, async function (req, res) {
@@ -532,28 +579,7 @@ router.post("/search", verifySignedIn, async function (req, res) {
 });
 
 
-router.get("/attendance", verifySignedIn, async function (req, res) {
-  try {
-    let user = req.session.user;
-    if (!user || !user._id) {
-      return res.status(403).send("Unauthorized");
-    }
-    const attendanceData = await userHelper.getAllattendancebyid(user._id);  // ✅ Pass user ID
 
-    console.log("Attendance Data:", JSON.stringify(attendanceData, null, 2)); // Debugging
-
-    res.render("users/dashboard/attendance", {
-      admin: false,
-      layout: 'layout',
-      attendance: attendanceData,
-      user
-    });
-
-  } catch (error) {
-    console.error("Error fetching attendance:", error);
-    res.status(500).send("Internal Server Error");
-  }
-});
 
 
 

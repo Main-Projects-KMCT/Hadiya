@@ -75,6 +75,7 @@ router.post("/submit-attendance", function (req, res) {
     selectedDate: req.body.selectedDate,
     period: req.body.period,
     Class: req.body.Class,
+    sem:req.body.sem,
 
     teacherId: req.body.teacherId,
     subjectId: req.body.subjectId,

@@ -19,7 +19,10 @@
                     <div class="card-body">
                         <h5 class="card-title">All Subject</h5>
 
-
+<button type="button" class="btn btn-primary mb-4" data-toggle="modal"
+                            data-target="#exampleModalCenter">
+                            + Add Subject
+                        </button>
 
                         <div class="table-responsive">
                             <!-- Table with stripped rows -->
@@ -38,7 +41,11 @@
                                     <tr>
                                         <td>{{incremented @index}}</td>
                                         <td>{{this.sname}} </td>
-                                        <td>{{this.teacher}}</td>
+                                        <td>
+                                        {{#each this.teacherNames}}
+                                            {{this}}{{#unless @last}}, {{/unless}}
+                                        {{/each}}
+                                        </td>
                                         <td >Active</td>
                                       
                                         <td>
@@ -88,11 +95,9 @@
 
                     <div class="col-md-12">
                         <label for="inputName5" class="form-label">Select Teacher</label>
-                        <select class="form-control form-control" name="teacher">
-                            <option selected disabled> Select Teacher</option>
+                        <select class="form-control form-control" name="teachers" multiple>
                             {{#each teachers}}
                             <option value="{{this._id}}"> {{this.Name}}</option>
-
                             {{/each}}
                         </select>
                     </div>

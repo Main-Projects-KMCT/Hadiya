@@ -125,37 +125,36 @@ module.exports = {
     });
   },
 
-  getAllteachersWithSubject: () => {
+  getAllTeachersWithSubjects: () => {
     return new Promise(async (resolve, reject) => {
-      let teachers = await db
-        .get()
-        .collection(collections.TEACHER_COLLECTION)
-        .aggregate([
-          {
+      try {
+        let teachers = await db.get().collection(collections.TEACHER_COLLECTION)
+          .aggregate([
+            {
               $lookup: {
-                  from: "subjects",  // Name of the subjects collection
-                  localField: "_id", // Teacher's _id in teachers collection
-                  foreignField: "teacher", // Reference in subjects collection
-                  as: "subjectInfo"
+                from: collections.SUBJECT_COLLECTION,
+                localField: "_id",  // Teacher's _id
+                foreignField: "teachers", // Searching inside subjects.teachers array
+                as: "subjects"
               }
-          },
-          {
-              $unwind: {
-                  path: "$subjectInfo", // Unwind subject data (if multiple subjects exist)
-                  preserveNullAndEmptyArrays: true // Keep teachers without subjects
-              }
-          },
-          {
+            },
+            {
               $project: {
+                _id: 1,
+                Name: 1,
+                subjects: { 
                   _id: 1,
-                  Name: 1,
-                  Email: 1,
-                  "sname": "$subjectInfo.sname" // Rename subject field
+                  sname: 1
+                }
               }
-          }
-      ]).toArray()
-      
-      resolve(teachers);
+            }
+          ])
+          .toArray();
+  
+        resolve(teachers);
+      } catch (error) {
+        reject(error);
+      }
     });
   },
 
@@ -640,43 +639,52 @@ module.exports = {
           .aggregate([
             {
               $lookup: {
-                from: collections.TEACHER_COLLECTION, // ✅ Correct teachers collection name
-                localField: "teacher", // ✅ Field in SUBJECT_COLLECTION (Assuming teacher ID is stored here)
-                foreignField: "_id", // ✅ Matching field in TEACHER_COLLECTION (ObjectId)
-                as: "teacherInfo", // ✅ Output array field
+                from: collections.TEACHER_COLLECTION,
+                localField: "teachers", // Array of ObjectIds in SUBJECT_COLLECTION
+                foreignField: "_id", // Matching _id in TEACHER_COLLECTION
+                as: "teacherInfo",
               },
             },
             {
-              $unwind: {
-                path: "$teacherInfo",
-                preserveNullAndEmptyArrays: true, // ✅ Keeps subjects without assigned teachers
+              $addFields: {
+                teacherNames: {
+                  $map: {
+                    input: "$teacherInfo",
+                    as: "teacher",
+                    in: "$$teacher.Name", // Extract teacher names
+                  },
+                },
               },
             },
             {
               $project: {
-                _id: 1, // ✅ Keep subject ID
-                sname: 1, // ✅ Keep subject name
-                scode: 1, // ✅ Add any other subject details
-                teacher: "$teacherInfo.Name", // ✅ Replace teacher ID with name
+                _id: 1,
+                sname: 1,
+                scode: 1,
+                teacherNames: 1, // Display extracted teacher names
               },
             },
           ])
           .toArray();
+  
         resolve(subjects);
       } catch (error) {
         reject(error);
       }
     });
   },
+  
 
   ///////ADD subject/////////////////////                                         
   addSubject: (subject, callback) => {
     console.log(subject);
 
     // Convert teacher ID to ObjectId
-    if (subject.teacher) {
-      subject.teacher = new ObjectId(subject.teacher);
-    }
+    if (subject.teachers) {
+      subject.teachers = subject.teachers.map(id => new ObjectId(id));
+  } else {
+      subject.teachers = [];
+  }
 
     db.get()
       .collection(collections.SUBJECT_COLLECTION)
@@ -686,19 +694,19 @@ module.exports = {
 
         const subjectId = data.insertedId; // ✅ Get the inserted subject ID
 
-        // ✅ Update the teacher document with the latest subject (replace previous one)
-        if (subject.teacher) {
+         // Update each teacher to reference the subject
+         if (subject.teachers.length > 0) {
           db.get()
             .collection(collections.TEACHER_COLLECTION)
-            .updateOne(
-              { _id: subject.teacher }, // ✅ Find teacher by ID
-              { $set: { subject: subjectId } } // ✅ Replace the `subject` field
+            .updateMany(
+                { _id: { $in: subject.teachers } },
+                { $addToSet: { subjects: subjectId } } // Add subject reference to each teacher
             )
             .then(() => {
-              console.log(`Subject ID ${subjectId} set for Teacher ID ${subject.teacher}`);
+                console.log(`Subject ID ${subjectId} added to teachers`);
             })
-            .catch((err) => console.error("Error updating teacher:", err));
-        }
+            .catch((err) => console.error("Error updating teachers:", err));
+      }
 
         callback(subjectId);
       })
@@ -792,11 +800,12 @@ module.exports = {
   addTimetable: (timetable, callback) => {
     console.log(timetable);
 
-    // Convert teacher IDs to ObjectId
-    for (let i = 1; i <= 6; i++) {
-      if (timetable[`teacher${i}`]) {
-        timetable[`teacher${i}`] = new ObjectId(timetable[`teacher${i}`]);
-      }
+    // Convert teacher IDs and subject IDs to ObjectId
+    if (timetable.periods) {
+        timetable.periods = timetable.periods.map(period => ({
+            teacher: new ObjectId(period.teacher),
+            subject: new ObjectId(period.subject)
+        }));
     }
 
     db.get()
@@ -804,30 +813,10 @@ module.exports = {
       .insertOne(timetable)
       .then((data) => {
         console.log("Timetable added:", data);
-
-        const timetableId = data.insertedId; // ✅ Get the inserted timetable ID
-
-        // ✅ Update the teacher documents with the latest timetable
-        for (let i = 1; i <= 6; i++) {
-          if (timetable[`teacher${i}`]) {
-            db.get()
-              .collection(collections.TEACHER_COLLECTION)
-              .updateOne(
-                { _id: timetable[`teacher${i}`] }, // ✅ Find teacher by ID
-                { $set: { timetable: timetableId } } // ✅ Replace the timetable field
-              )
-              .then(() => {
-                console.log(`Timetable ID ${timetableId} set for Teacher ${timetable[`teacher${i}`]}`);
-              })
-              .catch((err) => console.error("Error updating teacher:", err));
-          }
-        }
-
-        callback(timetableId);
+        callback(data.insertedId);
       })
       .catch((err) => console.error("Error inserting timetable:", err));
-  },
-
+},
 
   ///////All Attendance/////////////////////                                         
   getAllattendance: () => {

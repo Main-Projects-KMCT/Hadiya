@@ -434,6 +434,7 @@ router.get("/all-subjects", verifySignedIn, async function (req, res) {
   let administator = req.session.admin;
   let subjects = await adminHelper.getAllSubjects();
   let teachers = await adminHelper.getAllteachers();
+  console.log(subjects,":::::;")
 
   res.render("admin/subjects/all-subjects", { admin: true, layout: "admin-layout", subjects, administator, teachers });
 });
@@ -456,7 +457,7 @@ router.post("/delete-subject/:id", verifySignedIn, async function (req, res) {
 router.get("/all-timetables", verifySignedIn, async function (req, res) {
   let administator = req.session.admin;
   let timetables = await adminHelper.getAllTimetables();
-  let teachers = await adminHelper.getAllteachersWithSubject();
+  let teachers = await adminHelper.getAllTeachersWithSubjects();
   console.log("_____",teachers,"*****")
 
   res.render("admin/timetables/all-timetables", { admin: true, layout: "admin-layout", timetables, administator, teachers });

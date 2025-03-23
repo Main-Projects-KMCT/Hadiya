@@ -100,12 +100,14 @@
 
                     <!-- Teacher Selection for each period -->
                     <div class="col-md-12 mt-3">
-                        <label for="inputName5" class="form-label"><b>1st Period</b></label>
+                        <label for="inputName5" class="form-label"><b>1nd Period</b></label>
                         <select class="form-control form-control" name="teacher1">
                             <option selected disabled> Select Teacher</option>
-                            {{#each teachers}}
-                            <option value="{{this._id}}"> {{this.Name}} - {{this.sname}}</option>
+                          {{#each teachers}}
+                            {{#each this.subjects}}
+                                <option value="{{../_id}}|{{this._id}}">{{../Name}} - {{this.sname}}</option>
                             {{/each}}
+                        {{/each}}
                         </select>
                     </div>
 
@@ -114,18 +116,37 @@
                         <select class="form-control form-control" name="teacher2">
                             <option selected disabled> Select Teacher</option>
                             {{#each teachers}}
-                            <option value="{{this._id}}"> {{this.Name}}</option>
+                            <option value="{{this._id}}"> {{this.Name}} - {{this.sname}}</option>
                             {{/each}}
                         </select>
                     </div>
+                    <div class="col-md-12 mt-3">
+                            <label for="inputName5" class="form-label"><b>2nd Period</b></label>
+                            <select class="form-control form-control" name="teacher2">
+                                <option selected disabled> Select Teacher</option>
+                                {{#each teachers}}
+                                <option value="{{this._id}}">
+                                    {{this.Name}} - 
+                                    {{#each this.subjects}}
+                                    {{this}}{{#unless @last}}, {{/unless}}
+                                    {{/each}}
+                                </option>
+                                {{/each}}
+                            </select>
+                            </div>
 
                     <div class="col-md-12 mt-3">
                         <label for="inputName5" class="form-label"><b>3rd Period</b></label>
                         <select class="form-control form-control" name="teacher3">
                             <option selected disabled> Select Teacher</option>
-                            {{#each teachers}}
-                            <option value="{{this._id}}"> {{this.Name}}</option>
-                            {{/each}}
+                                {{#each teachers}}
+                                <option value="{{this._id}}">
+                                    {{this.Name}} - 
+                                    {{#each this.subjects}}
+                                    {{this}}{{#unless @last}}, {{/unless}}
+                                    {{/each}}
+                                </option>
+                                {{/each}}
                         </select>
                     </div>
 
@@ -133,29 +154,44 @@
                         <label for="inputName5" class="form-label"><b>4th Period</b></label>
                         <select class="form-control form-control" name="teacher4">
                             <option selected disabled> Select Teacher</option>
-                            {{#each teachers}}
-                            <option value="{{this._id}}"> {{this.Name}}</option>
-                            {{/each}}
-                        </select>
+                                {{#each teachers}}
+                                <option value="{{this._id}}">
+                                    {{this.Name}} - 
+                                    {{#each this.subjects}}
+                                    {{this}}{{#unless @last}}, {{/unless}}
+                                    {{/each}}
+                                </option>
+                                {{/each}}
+                                </select>
                     </div>
 
                     <div class="col-md-12 mt-3">
                         <label for="inputName5" class="form-label"><b>5th Period</b></label>
                         <select class="form-control form-control" name="teacher5">
                             <option selected disabled> Select Teacher</option>
-                            {{#each teachers}}
-                            <option value="{{this._id}}"> {{this.Name}}</option>
-                            {{/each}}
-                        </select>
+                                {{#each teachers}}
+                                <option value="{{this._id}}">
+                                    {{this.Name}} - 
+                                    {{#each this.subjects}}
+                                    {{this}}{{#unless @last}}, {{/unless}}
+                                    {{/each}}
+                                </option>
+                                {{/each}}
+                                </select>
                     </div>
 
                     <div class="col-md-12 mt-3">
                         <label for="inputName5" class="form-label"><b>6th Period</b></label>
                         <select class="form-control form-control" name="teacher6">
-                            <option selected disabled> Select Teacher</option>
-                            {{#each teachers}}
-                            <option value="{{this._id}}"> {{this.Name}}</option>
-                            {{/each}}
+                             <option selected disabled> Select Teacher</option>
+                                {{#each teachers}}
+                                <option value="{{this._id}}">
+                                    {{this.Name}} - 
+                                    {{#each this.subjects}}
+                                    {{this}}{{#unless @last}}, {{/unless}}
+                                    {{/each}}
+                                </option>
+                                {{/each}}
                         </select>
                     </div>
 
