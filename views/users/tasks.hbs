@@ -10,7 +10,7 @@
     <div class="container">
 
         <div class="pagetitle">
-            <h1>My Assignments</h1>
+            <h1>ASSIGNMENTS</h1>
 
         </div><!-- End Page Title -->
 
@@ -18,26 +18,26 @@
 
             <div class="row">
                 <div class="col-lg-12">
-                    <a href="/" class="btn btn-dark btn-sm">Back</a>
+                    <a href="/" class="btn btn-dark btn-sm">BACK</a>
                     <div class="card shadow mt-3">
                         <div class="card-body">
                             <div class="table-responsive">
                                 <table class="table datatable table-bordered border">
                                     <thead>
                                         <tr>
-                                            <th>No.</th>
-                                            <th>Subject Details</th>
+                                            <th>NO.</th>
+                                            <th>SUBJECT</th>
 
-                                            <th data-type="date" data-format="YYYY/DD/MM"> Date</th>
-                                            <th data-type="date" data-format="YYYY/DD/MM"> deadline</th>
+                                            <th data-type="date" data-format="YYYY/DD/MM"> DATE</th>
+                                            <th data-type="date" data-format="YYYY/DD/MM"> DEADLINE</th>
 
                                             {{!-- <th>Image</th> --}}
-                                            <th>Note</th>
-                                            <th>Requirments</th>
+                                            <th>NOTE</th>
+                                            <th>REQUIREMENTS</th>
 
                                             {{!-- <th>Attended Students</th> --}}
 
-                                            <th>Manage</th>
+                                            <th>MANAGE</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -45,8 +45,8 @@
                                         <tr>
                                             <td>{{incremented @index}}</td>
                                             <td>
-                                                <p class="mb-0"><b>Teacher : </b> {{this.teacher}}</p>
-                                                <p class="mb-0"><b>Subject : </b> {{this.subject}}</p>
+                                                <p class="mb-0"><b>TEACHER : </b> {{this.teacher}}</p>
+                                                <p class="mb-0"><b>SUBJECT : </b> {{this.subject}}</p>
                                             </td>
                                             <td>{{formatDate this.date}}</td>
                                             <td class="text-danger">{{formatDate this.deadline}}</td>
