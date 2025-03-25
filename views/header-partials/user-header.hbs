@@ -4,38 +4,38 @@
         <a href="/" class="logo d-flex align-items-center">
             <!-- Uncomment the line below if you also wish to use an image logo -->
             <!-- <img src="assets/img/logo.png" alt=""> -->
-            <h1 class="sitename">ET LAB</h1>
+            <h1 class="sitename">EduLink</h1>
         </a>
 
         <nav id="navmenu" class="navmenu">
             <ul>
-                <li><a href="/" class="active">Home</a></li>
-                <li><a href="#about">About</a></li>
-                <li><a href="#services">Services</a></li>
+                <li><a href="/" class="active">HOME</a></li>
+                <li><a href="#about">ABOUT</a></li>
+                <li><a href="#services">COURSES</a></li>
                 {{#if user}}
                 <li class="dropdown active" style="border-radius: 20px;"><a href="#"><span>{{user.Fname}}</span> <i
                             class="bi bi-chevron-down toggle-dropdown"></i></a>
                     <ul>
-                        <li><a href="/dashboard">My Dashboard</a></li>
-                        <li><a href="/profile">My Profile</a></li>
-                        <li><a href="/notifications">My Notifications</a></li>
+                        <li><a href="/dashboard">DASHBOARD</a></li>
+                        <li><a href="/profile">PROFILE</a></li>
+                        <li><a href="/notifications">NOTIFICATIONS</a></li>
 
-                        <li><a href="/signout">Logout</a></li>
+                        <li><a href="/signout">LOGOUT</a></li>
 
                     </ul>
                 </li>
                 {{else}}
-                <li class="dropdown active" style="border-radius: 20px;"><a href="#"><span>Get Started</span> <i
+                <li class="dropdown active" style="border-radius: 20px;"><a href="#"><span>GET STARTED</span> <i
                             class="bi bi-chevron-down toggle-dropdown"></i></a>
                     <ul>
-                        <li><a href="/signin">Login as Student</a></li>
+                        <li><a href="/signin">LOGIN AS STUDENT</a></li>
 
-                        <li><a href="/teacher">Login as Teacher</a></li>
+                        <li><a href="/teacher">LOGIN AS TEACHER</a></li>
 
                     </ul>
                 </li>
                 {{/if}}
-                <li><a href="#contact">Contact</a></li>
+                <li><a href="#contact">CONTACT</a></li>
 
             </ul>
             <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
