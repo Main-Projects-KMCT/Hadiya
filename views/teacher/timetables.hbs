@@ -25,19 +25,12 @@
       </tr>
     </thead>
     <tbody>
-       {{#each timetable}}
+        <tbody>
+        {{#each timetables}}
         <tr>
-            <td>{{_id}}</td>  {{!-- Day Name --}}
-            
-            {{!-- Loop through periods dynamically --}}
-            {{#each (lookup @root.periodMap _id)}}
-                <td>
-                    {{#if this}}
-                        {{this.class}}<br>{{this.subject}}
-                    {{else}}
-                        -
-                    {{/if}}
-                </td>
+            <td>{{day}}</td>
+            {{#each periods}}
+                <td>{{class}}<br>{{subject}}</td>
             {{/each}}
         </tr>
         {{/each}}

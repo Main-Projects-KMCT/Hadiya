@@ -37,21 +37,20 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {{#each timetables}}
-                                    <tr>
-                                        <td><b>{{this.day}}</b></td>
-
-                                        <td>{{this.teacher1}} </td>
-                                        <td>{{this.teacher2}}</td>
-                                        <td>{{this.teacher3}}</td>
-                                        <td>{{this.teacher4}}</td>
-                                        <td>{{this.teacher5}}</td>
-                                        <td>{{this.teacher6}}</td>
-
-
-
-                                    </tr>
-                                    {{/each}}
+                                     {{#each timetables}}
+        <tr>
+            <td>{{this.day}}</td>
+            {{#each this.periods}}
+                <td>
+                    {{#if subject}}
+                        {{subject}} 
+                    {{else}}
+                        -
+                    {{/if}}
+                </td>
+            {{/each}}
+        </tr>
+        {{/each}}
                                 </tbody>
                             </table>
                         </div>

@@ -599,7 +599,8 @@ router.post("/search", verifySignedIn, async function (req, res) {
 
 router.get("/timetable", verifySignedIn, async function (req, res) {
   let user = req.session.user;
-  let timetables = await adminHelper.getAllTimetables();
+  let cls= user.classname;
+  let timetables = await adminHelper.getAllTimetablesToStudent(cls)
   let teachers = await adminHelper.getAllteachers();
 
   res.render("users/dashboard/timetable", { admin: false, timetables, user, teachers });

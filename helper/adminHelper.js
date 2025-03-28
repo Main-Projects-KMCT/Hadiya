@@ -865,7 +865,7 @@ module.exports = {
             });
           }
         });
- console.log(result[0].periods,"kkkk")
+ console.log(result,"kkkk")
         resolve(result);
       } catch (err) {
         reject(err);
@@ -873,6 +873,71 @@ module.exports = {
     });
   },
   
+  getAllTimetablesToStudent:async (classname)=> {
+    const timetableCollection =  db.get().collection(collections.TIMETABLE_COLLECTION);
+    const subjectCollection =  db.get().collection(collections.SUBJECT_COLLECTION);
+    const teacherCollection =  db.get().collection(collections.TEACHER_COLLECTION);
+    
+
+    const timetable = await db.get().collection(collections.TIMETABLE_COLLECTION).aggregate([
+      { $match: { class: classname } }, // ✅ Match by class
+      {
+          $project: {
+              day: 1,
+              periods: [
+                  { period: "Period 1", value: "$period1" },
+                  { period: "Period 2", value: "$period2" },
+                  { period: "Period 3", value: "$period3" },
+                  { period: "Period 4", value: "$period4" },
+                  { period: "Period 5", value: "$period5" },
+                  { period: "Period 6", value: "$period6" }
+              ]
+          }
+      },
+      { $unwind: "$periods" }, // ✅ Convert periods into separate documents
+      {
+          $set: {
+              teacherId: { $toObjectId: { $arrayElemAt: [{ $split: ["$periods.value", "|"] }, 0] } }, // ✅ Extract Teacher ID
+              subjectId: { $toObjectId: { $arrayElemAt: [{ $split: ["$periods.value", "|"] }, 1] } }  // ✅ Extract Subject ID
+          }
+      },
+      {
+          $lookup: {
+              from: "subjects",
+              localField: "subjectId",
+              foreignField: "_id",
+              as: "subjectDetails"
+          }
+      },
+      {
+          $lookup: {
+              from: "teachers",
+              localField: "teacherId",
+              foreignField: "_id",
+              as: "teacherDetails"
+          }
+      },
+      {
+          $project: {
+              day: 1,
+              "periods.period": 1,
+              "periods.subject": { $arrayElemAt: ["$subjectDetails.sname", 0] },
+              "periods.teacher": { $arrayElemAt: ["$teacherDetails.Name", 0] }
+          }
+      },
+      {
+          $group: {
+              _id: "$day",
+              periods: { $push: "$periods" }
+          }
+      },
+      { $project: { _id: 0, day: "$_id", periods: 1 } }
+    ]).toArray();
+
+    console.log(timetable[0].periods,"ssssssssutttttttt")
+
+    return timetable;
+},
                                          
 
   getAllTimetables: (code, cls) => {
