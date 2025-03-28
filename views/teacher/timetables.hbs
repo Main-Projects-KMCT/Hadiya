@@ -12,7 +12,38 @@
                         <div class="card-body">
                             <div class="table-responsive">
                                 <table class="table border table-bordered">
-                                    <thead>
+                
+       <thead class="table-dark">
+      <tr>
+        <th>Day</th>
+        <th>Period 1</th>
+        <th>Period 2</th>
+        <th>Period 3</th>
+        <th>Period 4</th>
+        <th>Period 5</th>
+        <th>Period 6</th>
+      </tr>
+    </thead>
+    <tbody>
+       {{#each timetable}}
+        <tr>
+            <td>{{_id}}</td>  {{!-- Day Name --}}
+            
+            {{!-- Loop through periods dynamically --}}
+            {{#each (lookup @root.periodMap _id)}}
+                <td>
+                    {{#if this}}
+                        {{this.class}}<br>{{this.subject}}
+                    {{else}}
+                        -
+                    {{/if}}
+                </td>
+            {{/each}}
+        </tr>
+        {{/each}}
+    </tbody>
+
+                                    {{!-- <thead>
                                         <tr>
                                             <th>Day</th>
                                             <th>Period 1 </th>
@@ -48,7 +79,7 @@
                                                 {{this.teacher6}}</td>
                                         </tr>
                                         {{/each}}
-                                    </tbody>
+                                    </tbody> --}}
                                 </table>
                             </div>
                         </div>

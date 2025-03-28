@@ -47,7 +47,19 @@ app.engine(
       },
       json:function (context) {
         return JSON.stringify(context);
-    }
+    },
+    makePeriodCells: (periods) => {
+      let cells = [];
+      for (let i = 1; i <= 6; i++) {
+        let period = periods.find((p) => p.period === `Period ${i}`);
+        if (period) {
+          cells.push(`${period.class}<br>${period.subject}`);
+        } else {
+          cells.push("-");
+        }
+      }
+      return cells;
+    },
     },
   })
 );

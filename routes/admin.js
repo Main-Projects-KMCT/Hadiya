@@ -434,16 +434,81 @@ router.get("/all-subjects", verifySignedIn, async function (req, res) {
   let administator = req.session.admin;
   let subjects = await adminHelper.getAllSubjects();
   let teachers = await adminHelper.getAllteachers();
-  console.log(subjects,":::::;")
+  const deps = await db.get().collection(collections.DEPARTMENT_COLLECTION).find({}).toArray();
 
-  res.render("admin/subjects/all-subjects", { admin: true, layout: "admin-layout", subjects, administator, teachers });
+  // console.log(subjects,":::::;")
+
+  res.render("admin/subjects/all-subjects", { admin: true, layout: "admin-layout", subjects,deps, administator, teachers });
 });
 
 ///////ADD teacher/////////////////////                                         
-router.post("/add-subject", function (req, res) {
-  adminHelper.addSubject(req.body, (id) => {
-    res.redirect("/admin/subjects/all-subjects");
+router.post('/subjects/add-subject', async (req, res) => {
+  try {
+      const subject = req.body;
+      const subjectId = await adminHelper.addSubject(subject);
+      res.json({ success: true, subjectId });
+  } catch (err) {
+      console.error('Add subject error:', err);
+      res.json({ success: false, message: 'Failed to add subject' });
+  }
+});
 
+///dep
+router.get("/departments/all-dep", verifySignedIn, async function (req, res) {
+  let administator = req.session.admin;
+  let deps = await adminHelper.getAllDepartments();
+  console.log(deps ,":::::;")
+
+  res.render("admin/departments/all-dep", { admin: true, layout: "admin-layout", deps , administator });
+});
+
+router.get("/departments/add-dep", verifySignedIn, async function (req, res) {
+  let administator = req.session.admin;
+  res.render("admin/departments/add-dep", { admin: true, layout: "admin-layout", administator });
+});
+router.post("/delete-department/:id", verifySignedIn, async function (req, res) {
+  await db.get().collection(collections.DEPARTMENT_COLLECTION).deleteOne({ _id: ObjectId(req.params.id) });
+  res.redirect("/admin/departments/all-dep");
+});
+
+
+router.post("/add-dep", function (req, res) {
+  adminHelper.addDep(req.body, (id) => {
+    res.redirect("/admin/departments/all-dep");
+
+  });
+});
+
+
+//class
+
+router.get("/classes/all-class", verifySignedIn, async function (req, res) {
+  let administator = req.session.admin;
+  let deps = await adminHelper.getAllDepartments();
+  let cls = await adminHelper.getAllClasses();
+  console.log(cls,":::::;")
+  res.render("admin/classes/all-class", { admin: true, layout: "admin-layout", cls, deps,administator });
+});
+router.post("/delete-class/:id", verifySignedIn, async function (req, res) {
+  await db.get().collection(collections.CLASSES_COLLECTION).deleteOne({ _id: ObjectId(req.params.id) });
+  res.redirect("/admin/classes/all-class");
+});
+
+
+router.post("/add-class", async function (req, res) {
+  const { name, depId } = req.body;
+  const existing = await db.get().collection(collections.CLASSES_COLLECTION).findOne({ name: name });
+        if (existing) {
+            return res.redirect("/admin/classes/all-class");
+        }
+  const dep = await db.get().collection(collections.DEPARTMENT_COLLECTION).findOne({ _id: ObjectId(depId) });
+  const newClass = {
+    name: name,
+    depname: dep.name,
+    depcode: dep.depcode
+};
+  adminHelper.addClass(newClass, (id) => {
+    res.redirect("/admin/classes/all-class");
   });
 });
 
@@ -453,15 +518,40 @@ router.post("/delete-subject/:id", verifySignedIn, async function (req, res) {
 });
 
 
-///////ALL timetables/////////////////////                                         
-router.get("/all-timetables", verifySignedIn, async function (req, res) {
+///////ALL timetables/////////////////////   
+router.get("/timetables/all-timetables", verifySignedIn, async function (req, res) {
   let administator = req.session.admin;
-  let timetables = await adminHelper.getAllTimetables();
-  let teachers = await adminHelper.getAllTeachersWithSubjects();
-  console.log("_____",teachers,"*****")
-
-  res.render("admin/timetables/all-timetables", { admin: true, layout: "admin-layout", timetables, administator, teachers });
+  let deps = await adminHelper.getAllDepartments();
+  res.render("admin/departments/select-dep", { admin: true, layout: "admin-layout", deps , administator });
 });
+router.get("/timetables/select-class/:code", verifySignedIn, async function (req, res) {
+  let administator = req.session.admin;
+  let cls = await adminHelper.getClassesByCode(req.params.code);
+  res.render("admin/classes/sel-class", { admin: true, layout: "admin-layout", cls , administator });
+});
+router.get("/timetables/:class/:code", verifySignedIn, async function (req, res) {
+  let administator = req.session.admin;
+  let code =req.params.code;
+  let cls= req.params.class;
+  let timetables= await adminHelper.getAllTimetables(code,cls);
+  let teachers = await adminHelper.getAllTeachersWithSubjects(cls);
+
+  console.log(timetables,"teeeeee__________")
+  res.render("admin/timetables/all-timetables", { admin: true, layout: "admin-layout", teachers,cls ,code,timetables, administator });
+});
+
+
+
+                                 
+// router.get("/all-timetables", verifySignedIn, async function (req, res) {
+//   let administator = req.session.admin;
+//   let deps= await adminHelper.getAllDepartments();
+//   let timetables = await adminHelper.getAllTimetables();
+//   let teachers = await adminHelper.getAllTeachersWithSubjects();
+//   console.log("_____",teachers,"*****")
+
+//   res.render("admin/timetables/all-timetables", { admin: true, layout: "admin-layout", deps });
+// });
 
 ///////ADD teacher/////////////////////                                         
 router.post("/add-timetable", function (req, res) {

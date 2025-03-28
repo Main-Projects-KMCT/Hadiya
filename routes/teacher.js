@@ -119,49 +119,14 @@ router.post("/add-leave", function (req, res) {
 ///////ALL timetables/////////////////////                                         
 router.get("/timetables", verifySignedIn, async function (req, res) {
   let teacher = req.session.teacher; // Ensure session contains teacher details
-  let timetables = await adminHelper.getAllTimetables();
-  let teachers = await adminHelper.getAllteachers();
+  let timetables = await adminHelper.getTeacherTimetable(teacher._id);
+
   try {
 
-    // ✅ Fetch teacher details along with the subject details using `$lookup`
-    let teacherDetails = await db.get()
-      .collection(collections.TEACHER_COLLECTION)
-      .aggregate([
-        {
-          $match: { _id: new ObjectId(teacher._id) } // ✅ Match the logged-in teacher
-        },
-        {
-          $lookup: {
-            from: collections.SUBJECT_COLLECTION, // ✅ Join with SUBJECT_COLLECTION
-            localField: "subject", // ✅ Match teacher's `subject` field
-            foreignField: "_id", // ✅ Match `_id` from SUBJECT_COLLECTION
-            as: "subjectDetails" // ✅ Store result as `subjectDetails`
-          }
-        },
-        {
-          $unwind: {
-            path: "$subjectDetails", // ✅ Extract subject details (if exists)
-            preserveNullAndEmptyArrays: true // ✅ Allow teachers with no subjects
-          }
-        }
-      ])
-      .toArray();
-
-    if (teacherDetails.length > 0) {
-      teacher = teacherDetails[0]; // ✅ Set the full teacher details
-    }
-
-    // ✅ Fetch all users (you can add a helper for this if it's not already present)
-    let users = await db.get()
-      .collection(collections.USERS_COLLECTION) // Assuming the collection name is USER_COLLECTION
-      .find() // Get all users
-      .toArray();
-
     res.render("teacher/timetables", {
-      teacher: true, teacher, users,
+      teacher: true, teacher,
       layout: "teacher",
       timetables,
-      teachers,
       loggedTeacherName: teacher ? teacher.Name : null,
     });
   } catch (error) {
@@ -536,13 +501,15 @@ router.get("/pending-approval", function (req, res) {
 });
 
 
-router.get("/signup", function (req, res) {
+router.get("/signup",async function (req, res) {
   if (req.session.signedInTeacher) {
     res.redirect("/teacher");
   } else {
+     const deps = await db.get().collection(collections.DEPARTMENT_COLLECTION).find({}).toArray();
     res.render("teacher/signup", {
       teacher: true, layout: "empty",
       signUpErr: req.session.signUpErr,
+      deps
     });
   }
 });
@@ -581,6 +548,7 @@ router.post("/signup", async function (req, res) {
 
   // If there are validation errors, re-render the form
   if (Object.keys(errors).length > 0) {
+     const deps = await db.get().collection(collections.DEPARTMENT_COLLECTION).find({}).toArray();
     return res.render("teacher/signup", {
       teacher: true,
       layout: 'empty',
@@ -591,7 +559,7 @@ router.post("/signup", async function (req, res) {
       Address,
       City,
       Pincode,
-      Password
+      Password,deps
     });
   }
 

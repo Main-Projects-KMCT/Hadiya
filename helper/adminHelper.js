@@ -125,38 +125,49 @@ module.exports = {
     });
   },
 
-  getAllTeachersWithSubjects: () => {
+  getAllTeachersWithSubjects: (cls) => {
     return new Promise(async (resolve, reject) => {
       try {
-        let teachers = await db.get().collection(collections.TEACHER_COLLECTION)
+        let data = await db.get().collection(collections.SUBJECT_COLLECTION)
           .aggregate([
             {
+              $match: { classname: cls } // Filter by class
+            },
+            {
+              $unwind: "$teachers" // Split each teacher
+            },
+            {
               $lookup: {
-                from: collections.SUBJECT_COLLECTION,
-                localField: "_id",  // Teacher's _id
-                foreignField: "teachers", // Searching inside subjects.teachers array
-                as: "subjects"
+                from: collections.TEACHER_COLLECTION,
+                localField: "teachers",
+                foreignField: "_id",
+                as: "teacher"
               }
             },
             {
+              $unwind: "$teacher"
+            },
+            {
               $project: {
-                _id: 1,
-                Name: 1,
-                subjects: { 
-                  _id: 1,
-                  sname: 1
+                _id: "$teacher._id",
+                Name: "$teacher.Name",
+                class: "$classname",
+                subject: {
+                  _id: "$_id",
+                  sname: "$sname"
                 }
               }
             }
           ])
           .toArray();
   
-        resolve(teachers);
+        resolve(data);
       } catch (error) {
         reject(error);
       }
     });
   },
+  
 
   ///////ADD teacher DETAILS/////////////////////                                            
   getteacherDetails: (teacherId) => {
@@ -628,6 +639,76 @@ module.exports = {
   },
 
   /////////////////////////////////////////////////
+  getAllDepartments:()=>{
+    return new Promise(async (resolve, reject) => {
+      try {
+        const dep = await db
+          .get()
+          .collection(collections.DEPARTMENT_COLLECTION)
+          .find()
+          .toArray();
+
+        resolve(dep);
+      } catch (err) {
+        reject(err);  // Handle any error during fetching
+      }
+    });
+  },
+  addDep: (data, callback) => {
+    console.log(data,"deeppp");
+
+    db.get()
+      .collection(collections.DEPARTMENT_COLLECTION)
+      .insertOne(data)
+      .then((mdata) => {
+        callback(mdata.insertedId);
+      })
+      .catch((err) => console.error("Error inserting depppp:", err));
+  },
+  getAllClasses:()=>{
+    return new Promise(async (resolve, reject) => {
+      try {
+        const cls = await db
+          .get()
+          .collection(collections.CLASSES_COLLECTION)
+          .find()
+          .toArray();
+
+        resolve(cls);
+      } catch (err) {
+        reject(err);  // Handle any error during fetching
+      }
+    });
+  },
+  getClassesByCode:(code)=>{
+    return new Promise(async (resolve, reject) => {
+      try {
+        const cls = await db
+          .get()
+          .collection(collections.CLASSES_COLLECTION)
+          .find({
+            depcode:code
+            })
+          .toArray();
+
+        resolve(cls);
+      } catch (err) {
+        reject(err);  // Handle any error during fetching
+      }
+    });
+
+  },
+
+  addClass: (data, callback) => {
+    console.log(data,"clsssss");
+    db.get()
+      .collection(collections.CLASSES_COLLECTION)
+      .insertOne(data)
+      .then((mdata) => {
+        callback(mdata.insertedId);
+      })
+      .catch((err) => console.error("Error inserting clds:", err));
+  },
 
   ///////GET ALL subject/////////////////////                                            
   getAllSubjects: () => {
@@ -673,50 +754,52 @@ module.exports = {
       }
     });
   },
+
+
   
 
   ///////ADD subject/////////////////////                                         
-  addSubject: (subject, callback) => {
-    console.log(subject);
+  addSubject: async (subject) => {
+    try {
+      if (subject.teachers) {
+        if (!Array.isArray(subject.teachers)) {
+            subject.teachers = [subject.teachers]; // force to array
+        }
+        subject.teachers = subject.teachers.map(id => new ObjectId(id));
+    } else {
+        subject.teachers = [];
+    }
 
-    // Convert teacher ID to ObjectId
-    if (subject.teachers) {
-      subject.teachers = subject.teachers.map(id => new ObjectId(id));
-  } else {
-      subject.teachers = [];
-  }
+        // Convert teacher IDs to ObjectId
+        subject.teachers = subject.teachers.map(id => new ObjectId(id));
 
-    db.get()
-      .collection(collections.SUBJECT_COLLECTION)
-      .insertOne(subject)
-      .then((data) => {
-        console.log("Subject added:", data);
+        const result = await db.get()
+            .collection(collections.SUBJECT_COLLECTION)
+            .insertOne(subject);
 
-        const subjectId = data.insertedId; // ✅ Get the inserted subject ID
+        const subjectId = result.insertedId;
 
-         // Update each teacher to reference the subject
-         if (subject.teachers.length > 0) {
-          db.get()
-            .collection(collections.TEACHER_COLLECTION)
-            .updateMany(
-                { _id: { $in: subject.teachers } },
-                { $addToSet: { subjects: subjectId } } // Add subject reference to each teacher
-            )
-            .then(() => {
-                console.log(`Subject ID ${subjectId} added to teachers`);
-            })
-            .catch((err) => console.error("Error updating teachers:", err));
-      }
+        // Update teachers' subject reference
+        if (subject.teachers.length > 0) {
+            await db.get()
+                .collection(collections.TEACHER_COLLECTION)
+                .updateMany(
+                    { _id: { $in: subject.teachers } },
+                    { $addToSet: { subjects: subjectId } }
+                );
+        }
 
-        callback(subjectId);
-      })
-      .catch((err) => console.error("Error inserting subject:", err));
-  },
+        return subjectId;
+    } catch (err) {
+        console.error('Error in addSubject:', err);
+        throw err;
+    }
+},
 
 
 
-  ///////GET ALL timetable/////////////////////                                            
-  getAllTimetables: () => {
+  ///////GET ALL timetable/////////////////////   
+  getTeacherTimetable: (teacherId) => {
     return new Promise(async (resolve, reject) => {
       try {
         let timetables = await db
@@ -725,75 +808,148 @@ module.exports = {
           .aggregate([
             {
               $lookup: {
-                from: collections.TEACHER_COLLECTION,
-                localField: "teacher1", // Matching teacher1 field
-                foreignField: "_id",
-                as: "teacherInfo1", // Teacher info for teacher1
-              },
-            },
-            {
-              $lookup: {
-                from: collections.TEACHER_COLLECTION,
-                localField: "teacher2", // Matching teacher2 field
-                foreignField: "_id",
-                as: "teacherInfo2", // Teacher info for teacher2
-              },
-            },
-            {
-              $lookup: {
-                from: collections.TEACHER_COLLECTION,
-                localField: "teacher3", // Matching teacher3 field
-                foreignField: "_id",
-                as: "teacherInfo3", // Teacher info for teacher3
-              },
-            },
-            {
-              $lookup: {
-                from: collections.TEACHER_COLLECTION,
-                localField: "teacher4", // Matching teacher4 field
-                foreignField: "_id",
-                as: "teacherInfo4", // Teacher info for teacher4
-              },
-            },
-            {
-              $lookup: {
-                from: collections.TEACHER_COLLECTION,
-                localField: "teacher5", // Matching teacher5 field
-                foreignField: "_id",
-                as: "teacherInfo5", // Teacher info for teacher5
-              },
-            },
-            {
-              $lookup: {
-                from: collections.TEACHER_COLLECTION,
-                localField: "teacher6", // Matching teacher6 field
-                foreignField: "_id",
-                as: "teacherInfo6", // Teacher info for teacher6
-              },
-            },
-            {
-              $project: {
-                _id: 1,
-                sname: 1,
-                scode: 1,
-                day: 1,
-                teacher1: { $arrayElemAt: ["$teacherInfo1.Name", 0] }, // Get teacher1's name
-                teacher2: { $arrayElemAt: ["$teacherInfo2.Name", 0] }, // Get teacher2's name
-                teacher3: { $arrayElemAt: ["$teacherInfo3.Name", 0] }, // Get teacher3's name
-                teacher4: { $arrayElemAt: ["$teacherInfo4.Name", 0] }, // Get teacher4's name
-                teacher5: { $arrayElemAt: ["$teacherInfo5.Name", 0] }, // Get teacher5's name
-                teacher6: { $arrayElemAt: ["$teacherInfo6.Name", 0] }, // Get teacher6's name
+                from: collections.SUBJECT_COLLECTION,
+                let: {
+                  period1: { $split: ["$period1", "|"] },
+                  period2: { $split: ["$period2", "|"] },
+                  period3: { $split: ["$period3", "|"] },
+                  period4: { $split: ["$period4", "|"] },
+                  period5: { $split: ["$period5", "|"] },
+                  period6: { $split: ["$period6", "|"] },
+                },
+                pipeline: [
+                  {
+                    $match: {
+                      $expr: {
+                        $or: [
+                          { $eq: ["$_id", { $toObjectId: { $arrayElemAt: ["$$period1", 1] } }] },
+                          { $eq: ["$_id", { $toObjectId: { $arrayElemAt: ["$$period2", 1] } }] },
+                          { $eq: ["$_id", { $toObjectId: { $arrayElemAt: ["$$period3", 1] } }] },
+                          { $eq: ["$_id", { $toObjectId: { $arrayElemAt: ["$$period4", 1] } }] },
+                          { $eq: ["$_id", { $toObjectId: { $arrayElemAt: ["$$period5", 1] } }] },
+                          { $eq: ["$_id", { $toObjectId: { $arrayElemAt: ["$$period6", 1] } }] },
+                        ],
+                      },
+                    },
+                  },
+                ],
+                as: "subjects",
               },
             },
           ])
           .toArray();
 
+        // Filter by teacherId
+        let result = [];
+
+        timetables.forEach((t) => {
+          let dayData = [];
+          for (let i = 1; i <= 6; i++) {
+            let value = t[`period${i}`];
+            if (value) {
+              let [teacher, subject] = value.split("|");
+              if (teacher === teacherId) {
+                let subjectObj = t.subjects.find((s) => s._id.toString() === subject);
+                dayData.push({
+                  period: `Period ${i}`,
+                  class: t.class,
+                  subject: subjectObj ? subjectObj.sname : "-",
+                });
+              }
+            }
+          }
+          if (dayData.length > 0) {
+            result.push({
+              day: t.day,
+              periods: dayData,
+            });
+          }
+        });
+ console.log(result[0].periods,"kkkk")
+        resolve(result);
+      } catch (err) {
+        reject(err);
+      }
+    });
+  },
+  
+                                         
+
+  getAllTimetables: (code, cls) => {
+    return new Promise(async (resolve, reject) => {
+      try {
+        let timetables = await db
+          .get()
+          .collection(collections.TIMETABLE_COLLECTION)
+          .aggregate([
+            {
+              $match: { class: cls, depcode: code },
+            },
+            {
+              $addFields: {
+                periods: [
+                  "$period1",
+                  "$period2",
+                  "$period3",
+                  "$period4",
+                  "$period5",
+                  "$period6",
+                ],
+              },
+            },
+            {
+              $unwind: "$periods",
+            },
+            {
+              $addFields: {
+                teacherId: {
+                  $toObjectId: { $arrayElemAt: [{ $split: ["$periods", "|"] }, 0] },
+                },
+                subjectId: {
+                  $toObjectId: { $arrayElemAt: [{ $split: ["$periods", "|"] }, 1] },
+                },
+              },
+            },
+            {
+              $lookup: {
+                from: collections.TEACHER_COLLECTION,
+                localField: "teacherId",
+                foreignField: "_id",
+                as: "teacher",
+              },
+            },
+            {
+              $lookup: {
+                from: collections.SUBJECT_COLLECTION,
+                localField: "subjectId",
+                foreignField: "_id",
+                as: "subject",
+              },
+            },
+            {
+              $group: {
+                _id: "$_id",
+                day: { $first: "$day" },
+                periods: {
+                  $push: {
+                    period: "$periods",
+                    teacher: { $arrayElemAt: ["$teacher.Name", 0] },
+                    subject: { $arrayElemAt: ["$subject.sname", 0] },
+                  },
+                },
+              },
+            },
+          ])
+          .toArray()
+  
         resolve(timetables);
       } catch (error) {
         reject(error);
       }
     });
   },
+  
+  
 
 
   ///////ADD timetable/////////////////////                                         

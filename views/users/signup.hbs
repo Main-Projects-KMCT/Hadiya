@@ -122,6 +122,26 @@
                             </div>
                         </div>
 
+                         <div class="row g-1">
+                            <div class="col-lg-6">
+                                <label for="current-password" class="form-label mb-8 h6"> Select Department</label>
+                            <select class="form-control" name="depcode" id="departmentSelect" required>
+                            <option value="">-- Select Department --</option>
+                            {{#each deps}}
+                            <option value="{{this.depcode}}">{{this.name}}</option>
+                            {{/each}}
+                        </select>
+
+                            </div>
+
+                            <div class="col-lg-6">
+                                <label for="classSelect" class="form-label mb-8 h6">Select Class</label>
+                                <select class="form-control" name="classname" id="classSelect" required>
+                                    <option value="">-- Select Class --</option>
+                                </select>
+                            </div>
+                        </div>
+
                         <div class="form-group position-relative">
                             <label for="current-password" class="form-label mb-8 h6"> Password</label>
                             <div class="position-relative">
@@ -208,6 +228,34 @@
     });
 
 </script>
+<script>
+    $(document).ready(function () {
+        $('#departmentSelect').on('change', function () {
+            const depcode = $(this).val();
+            console.log(depcode)
+            if (depcode) {
+                $.ajax({
+                    url: `/get-classes/${depcode}`,
+                    method: 'GET',
+                    success: function (res) {
+                        $('#classSelect').empty().append('<option value="">-- Select Class --</option>');
+                        if (res.success) {
+                            res.classes.forEach(cls => {
+                                $('#classSelect').append(`<option value="${cls.name}">${cls.name}</option>`);
+                            });
+                        }
+                    },
+                    error: function () {
+                        alert('Failed to load classes');
+                    }
+                });
+            } else {
+                $('#classSelect').empty().append('<option value="">-- Select Class --</option>');
+            }
+        });
+    });
+</script>
+
 
 <script>
     // Get current date and time

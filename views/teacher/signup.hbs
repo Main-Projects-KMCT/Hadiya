@@ -99,6 +99,27 @@
                                 </div>
                             </div>
                         </div>
+                         <div class="row g-1">
+                                <div class="col-lg-6">
+                                <label for="current-password" class="form-label mb-8 h6"> Select Department</label>
+                            <select class="form-control" name="depcode" id="departmentSelect" required>
+                            <option value="">-- Select Department --</option>
+                            {{#each deps}}
+                            <option value="{{this.depcode}}">{{this.name}}</option>
+                            {{/each}}
+                        </select>
+                            </div>
+                                    <div class="col-lg-6">
+                                <label for="current-password" class="form-label mb-8 h6"> Select Role</label>
+                            <select class="form-control" name="role" id="roleSelect" required>
+                            <option value="">-- Select Role --</option>
+                            <option value="lecturer">lecturer</option>
+                             <option value="HOD">HOD</option>
+
+                        </select>
+
+                            </div>
+                        </div>
                         <div class="form-group position-relative">
                             <div class="position-relative">
                                 <input class="form-control py-11 ps-40" id="current-password" name="Password"

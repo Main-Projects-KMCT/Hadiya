@@ -101,6 +101,25 @@
                             {{/each}}
                         </select>
                     </div>
+                    <div class="row g-1">
+                            <div class="col-lg-6">
+                                <label for="current-password" class="form-label mb-8 h6"> Select Department</label>
+                            <select class="form-control" name="depcode" id="departmentSelect" required>
+                            <option value="">-- Select Department --</option>
+                            {{#each deps}}
+                            <option value="{{this.depcode}}">{{this.name}}</option>
+                            {{/each}}
+                        </select>
+
+                            </div>
+
+                            <div class="col-lg-6">
+                                <label for="classSelect" class="form-label mb-8 h6">Select Class</label>
+                                <select class="form-control" name="classname" id="classSelect" required>
+                                    <option value="">-- Select Class --</option>
+                                </select>
+                            </div>
+                        </div>
 
 
 
@@ -115,10 +134,46 @@
     </div>
 </div>
 <!-- jQuery -->
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 
 <!-- Bootstrap JS -->
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const departmentSelect = document.getElementById('departmentSelect');
+        const classSelect = document.getElementById('classSelect');
+
+        departmentSelect.addEventListener('change', function () {
+            const depcode = this.value;
+            console.log(depcode);
+
+            if (depcode) {
+                fetch(`/get-classes/${depcode}`)
+                    .then(response => response.json())
+                    .then(res => {
+                        classSelect.innerHTML = '<option value="">-- Select Class --</option>';
+                        if (res.success) {
+                            res.classes.forEach(cls => {
+                                const option = document.createElement('option');
+                                option.value = cls.name;
+                                option.textContent = cls.name;
+                                classSelect.appendChild(option);
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        alert('Failed to load classes');
+                        console.error(error);
+                    });
+            } else {
+                classSelect.innerHTML = '<option value="">-- Select Class --</option>';
+            }
+        });
+    });
+</script>
+
 
 <script>
     let userIdToBlock = null;
@@ -164,3 +219,44 @@
             });
     }
 </script>
+<script>
+$(document).ready(function () {
+    $('form[action="/admin/subjects/add-subject"]').on('submit', function (e) {
+        e.preventDefault();
+
+        const form = $(this)[0];
+        const formData = new FormData(form);
+
+        const teachers = formData.getAll('teachers');
+
+        const subject = {
+            sname: formData.get('sname'),
+            teachers: teachers,
+            depcode: formData.get('depcode'),
+            classname: formData.get('classname')
+        };
+
+        console.log(subject); // Check if teachers is always array
+
+        $.ajax({
+            url: '/admin/subjects/add-subject',
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(subject),
+            success: function (data) {
+                if (data.success) {
+                    alert('Subject Added Successfully');
+                    location.reload();
+                } else {
+                    alert('Failed: ' + data.message);
+                }
+            },
+            error: function (err) {
+                console.error('Error:', err);
+                alert('Something went wrong');
+            }
+        });
+    });
+});
+</script>
+

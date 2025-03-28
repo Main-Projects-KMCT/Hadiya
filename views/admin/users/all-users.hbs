@@ -31,6 +31,7 @@
                                         <th>Name</th>
                                         <th>Phone</th>
                                         <th>Address</th>
+                                          <th>Department</th>
                                         <th>Manage</th>
                                     </tr>
                                 </thead>
@@ -42,7 +43,7 @@
                                         <td>{{this.Fname}} {{this.Lname}}</td>
                                         <td>{{this.Phone}}</td>
                                         <td>{{this.Address}}</td>
-                                      
+                                        <td>{{this.depcode}}</td>
                                         {{#if this.isDisable}}
                                         <td>
                                             <button class="btn btn-secondary btn-sm" disabled>Blocked</button>

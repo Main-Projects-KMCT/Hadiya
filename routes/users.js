@@ -225,11 +225,12 @@ router.get("/usertype", async function (req, res, next) {
 
 
 
-router.get("/signup", function (req, res) {
+router.get("/signup", async function (req, res) {
   if (req.session.signedIn) {
     res.redirect("/");
   } else {
-    res.render("users/signup", { admin: false, layout: 'empty' });
+     const deps = await db.get().collection(collections.DEPARTMENT_COLLECTION).find({}).toArray();
+    res.render("users/signup", { admin: false, layout: 'empty',deps });
   }
 });
 
@@ -284,9 +285,11 @@ router.post("/signup", async function (req, res) {
   }
 
   if (Object.keys(errors).length > 0) {
+    const deps = await db.get().collection(collections.DEPARTMENT_COLLECTION).find({}).toArray();
     return res.render("users/signup", {
       admin: false,
       layout: 'empty',
+      deps,
       errors,
       Fname,
       Email,
@@ -308,6 +311,17 @@ router.post("/signup", async function (req, res) {
     res.status(500).send("An error occurred during signup.");
   });
 });
+
+router.get('/get-classes/:depcode', async (req, res) => {
+  try {
+      const depcode = req.params.depcode;
+      const classes = await db.get().collection('classes').find({ depcode: depcode }).toArray();
+      res.json({ success: true, classes });
+  } catch (err) {
+      console.error(err);
+      res.json({ success: false, message: 'Error fetching classes' });
+  }
+})
 
 
 router.get("/signin", function (req, res) {
