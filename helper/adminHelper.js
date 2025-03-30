@@ -807,6 +807,11 @@ module.exports = {
           .collection(collections.TIMETABLE_COLLECTION)
           .aggregate([
             {
+              $match: {
+                day: { $in: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"] }
+              }
+            },
+            {
               $lookup: {
                 from: collections.SUBJECT_COLLECTION,
                 let: {
@@ -815,7 +820,7 @@ module.exports = {
                   period3: { $split: ["$period3", "|"] },
                   period4: { $split: ["$period4", "|"] },
                   period5: { $split: ["$period5", "|"] },
-                  period6: { $split: ["$period6", "|"] },
+                  period6: { $split: ["$period6", "|"] }
                 },
                 pipeline: [
                   {
@@ -827,51 +832,64 @@ module.exports = {
                           { $eq: ["$_id", { $toObjectId: { $arrayElemAt: ["$$period3", 1] } }] },
                           { $eq: ["$_id", { $toObjectId: { $arrayElemAt: ["$$period4", 1] } }] },
                           { $eq: ["$_id", { $toObjectId: { $arrayElemAt: ["$$period5", 1] } }] },
-                          { $eq: ["$_id", { $toObjectId: { $arrayElemAt: ["$$period6", 1] } }] },
-                        ],
-                      },
-                    },
-                  },
+                          { $eq: ["$_id", { $toObjectId: { $arrayElemAt: ["$$period6", 1] } }] }
+                        ]
+                      }
+                    }
+                  }
                 ],
-                as: "subjects",
-              },
-            },
+                as: "subjects"
+              }
+            }
           ])
           .toArray();
-
-        // Filter by teacherId
-        let result = [];
-
+  
+        // Merging timetables for the same day
+        let mergedTimetables = {};
+  
         timetables.forEach((t) => {
-          let dayData = [];
+          let periodsData = [];
           for (let i = 1; i <= 6; i++) {
             let value = t[`period${i}`];
             if (value) {
-              let [teacher, subject] = value.split("|");
+              let [teacher, subjectId] = value.split("|");
               if (teacher === teacherId) {
-                let subjectObj = t.subjects.find((s) => s._id.toString() === subject);
-                dayData.push({
+                let subjectObj = t.subjects.find((s) => s._id.toString() === subjectId);
+                periodsData.push({
                   period: `Period ${i}`,
                   class: t.class,
-                  subject: subjectObj ? subjectObj.sname : "-",
+                  subject: subjectObj ? subjectObj.sname : "-"
                 });
               }
             }
           }
-          if (dayData.length > 0) {
-            result.push({
-              day: t.day,
-              periods: dayData,
-            });
+  
+          if (periodsData.length > 0) {
+            if (!mergedTimetables[t.day]) {
+              mergedTimetables[t.day] = [];
+            }
+            mergedTimetables[t.day].push(...periodsData);
           }
         });
- console.log(result,"kkkk")
+  
+        // Convert merged data to an array and sort periods
+        let result = Object.keys(mergedTimetables).map((day) => ({
+          day,
+          periods: mergedTimetables[day].sort((a, b) => {
+            let periodA = parseInt(a.period.split(" ")[1]);
+            let periodB = parseInt(b.period.split(" ")[1]);
+            return periodA - periodB;
+          })
+        }));
+  
+        console.log(JSON.stringify(result), "kkkk");
         resolve(result);
       } catch (err) {
         reject(err);
       }
     });
   },
+  
   
   getAllTimetablesToStudent:async (classname)=> {
     const timetableCollection =  db.get().collection(collections.TIMETABLE_COLLECTION);

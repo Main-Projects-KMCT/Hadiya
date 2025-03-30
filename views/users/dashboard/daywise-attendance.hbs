@@ -23,10 +23,20 @@
             <div class="row">
                 <div class="col-lg-12">
                     <a href="/dashboard/attendance" class="btn btn-dark btn-sm">Back</a>
-                    <a href="/attendance/subjectwise?userId={{user._id}}&class=1&sem=1" class="btn btn-dark btn-sm">subjectwise</a>
+                    <a href="/attendance/subjectwise?userId={{user._id}}&class={{user.classname}}&sem={{extractSem user.classname}}" class="btn btn-dark btn-sm">subjectwise</a>
+                    <div class="mb-2 mt-2">
+                        <label class="form-group"> Change semester</label>
+                        <select id="semSelect" class="form-select form-group form-select-sm">
+                        <option value="S1">Semester 1</option>
+                        <option value="S2">Semester 2</option>
+                         <option value="S3">Semester 3</option>
+                          <option value="S4">Semester 4</option>
+                    </select>
+                    <button id="updateSemBtn" class="btn btn-primary btn-sm">show</button>
+                    </div>
                     <div class="card shadow mt-3">
                         <div class="card-body">
-                            <h3>Daywise Attendance</h3>
+                            <h3>Daywise Attendance ({{className}})</h3>
                             <div class="table-responsive">
                                 <table class="table datatable table-bordered border">
                                     <thead>
@@ -95,6 +105,18 @@
     </div>
 </main><!-- End #main -->
 
+<script>
+document.getElementById("updateSemBtn").addEventListener("click", function() {
+    const selectedSem = document.getElementById("semSelect").value; 
+    const userId = "{{user._id}}";
+    const baseClass = "{{user.classname}}".split("_")[0]; // Extract department (e.g., MCA)
+    
+    const newClass = `${baseClass}_${selectedSem}`; // Change class name (e.g., MCA_S1 → MCA_S2)
+    
+    const newUrl = `/attendance/daywise?userId=${userId}&class=${newClass}&sem=${selectedSem}`;
+    window.location.href = newUrl;
+});
+</script>
 <script>
     document.addEventListener("DOMContentLoaded", function () {
     document.querySelectorAll(".view-attendance").forEach(button => {

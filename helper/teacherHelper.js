@@ -340,6 +340,108 @@ module.exports = {
       }
     });
   },
+  getTeacherClass: (teacherId) => {
+    return new Promise(async (resolve, reject) => {
+      try {
+        let timetables = await db
+          .get()
+          .collection(collections.TIMETABLE_COLLECTION)
+          .aggregate([
+            {
+              $match: {
+                $or: [
+                  { period1: { $regex: `^${teacherId}\\|` } },
+                  { period2: { $regex: `^${teacherId}\\|` } },
+                  { period3: { $regex: `^${teacherId}\\|` } },
+                  { period4: { $regex: `^${teacherId}\\|` } },
+                  { period5: { $regex: `^${teacherId}\\|` } },
+                  { period6: { $regex: `^${teacherId}\\|` } }
+                ]
+              }
+            },
+            {
+              $group: {
+                _id: "$class" // Group by class name to get unique class names
+              }
+            },
+            {
+              $project: {
+                _id: 0,
+                className: "$_id" // Rename field for output
+              }
+            }
+          ])
+          .toArray();
+          console.log(JSON.stringify(timetables),"clssssssss")
+  
+        resolve(timetables); // Return the list of class names
+      } catch (err) {
+        reject(err);
+      }
+    });
+  }, 
+  getTeacherSubject: (teacherId) => {
+    return new Promise(async (resolve, reject) => {
+      try {
+        let timetables = await db
+          .get()
+          .collection(collections.TIMETABLE_COLLECTION)
+          .aggregate([
+            {
+              $match: {
+                $or: [
+                  { period1: { $regex: `^${teacherId}\\|` } },
+                  { period2: { $regex: `^${teacherId}\\|` } },
+                  { period3: { $regex: `^${teacherId}\\|` } },
+                  { period4: { $regex: `^${teacherId}\\|` } },
+                  { period5: { $regex: `^${teacherId}\\|` } },
+                  { period6: { $regex: `^${teacherId}\\|` } }
+                ]
+              }
+            },
+            {
+              $project: {
+                className: "$class",
+                subjects: [
+                  { $arrayElemAt: [{ $split: ["$period1", "|"] }, 1] },
+                  { $arrayElemAt: [{ $split: ["$period2", "|"] }, 1] },
+                  { $arrayElemAt: [{ $split: ["$period3", "|"] }, 1] },
+                  { $arrayElemAt: [{ $split: ["$period4", "|"] }, 1] },
+                  { $arrayElemAt: [{ $split: ["$period5", "|"] }, 1] },
+                  { $arrayElemAt: [{ $split: ["$period6", "|"] }, 1] }
+                ]
+              }
+            },
+            {
+              $unwind: "$subjects"
+            },
+            {
+              $match: {
+                subjects: { $ne: null } // Remove empty subjects
+              }
+            },
+            {
+              $group: {
+                _id: "$className",
+                subjects: { $addToSet: "$subjects" }
+              }
+            },
+            {
+              $project: {
+                _id: 0,
+                className: "$_id",
+                subjects: 1
+              }
+            }
+          ])
+          .toArray();
+          console.log(JSON.stringify(timetables),"subbbbbbbbbbbbb")
+        resolve(timetables);
+      } catch (err) {
+        reject(err);
+      }
+    });
+  },  
 
   ///////ADD material/////////////////////                                         
   addmaterial: (material, teacherId, callback) => {

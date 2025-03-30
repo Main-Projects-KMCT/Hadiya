@@ -25,7 +25,7 @@
                         <div class="icon">
                             <i class="bi bi-calendar4-week" style="color: #0dcaf0;"></i>
                         </div>
-                        <a href="/attendance/daywise?userId={{user._id}}&class=1&sem=1" class="stretched-link">
+                        <a href="/attendance/daywise?userId={{user._id}}&class={{user.classname}}&sem={{extractSem user.classname}}" class="stretched-link">
                             <h3>Day wise</h3>
                         </a>
                   
@@ -37,7 +37,7 @@
                         <div class="icon">
                             <i class="bi bi-calendar4-week" style="color: #fd7e14;"></i>
                         </div>
-                        <a href="/attendance/subjectwise?userId={{user._id}}&class=1&sem=1" class="stretched-link">
+                        <a href="/attendance/subjectwise?userId={{user._id}}&class={{user.classname}}&sem={{extractSem user.classname}}" class="stretched-link">
                             <h3>Subject wise</h3>
                         </a>
               

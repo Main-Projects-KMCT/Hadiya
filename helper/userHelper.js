@@ -29,7 +29,23 @@ module.exports = {
       }
     });
   },
+  getexamById:(cls)=>{
+    return new Promise(async (resolve, reject) => {
+          try {
+            // Fetch exams based on teacherId (converted to ObjectId)
+            const exams = await db.get()
+              .collection(collections.EXAM_COLLECTION)
+              .find({ classname
+                : cls }) // Filter by logged-in userId
+              .toArray();
+    
+            resolve(exams);
+          } catch (error) {
+            reject(error);
+          }
+        });
 
+  },
 
 
 
@@ -243,125 +259,146 @@ module.exports = {
       }
     });
   },
-  getSubjectWiseAttendance:async (userId, className,sem) =>{
+  getSubjectWiseAttendance: async (userId, className, sem) => {
     try {
-      const attendanceCollection = await db.get().collection(collections.ATTENDANCE_COLLECTION)
+        const attendanceCollection = await db.get().collection(collections.ATTENDANCE_COLLECTION);
 
-      const results = await attendanceCollection.aggregate([
-          {
-              $match: {
-                  sem:sem,
-                  Class: className, // Filter by class
-                  $or: [
-                      { present: { $elemMatch: { $eq: ObjectId(userId) } } },
-                      { absent: { $elemMatch: { $eq: ObjectId(userId) } } }
-                  ]
-              }
-          },
-          {
-              $group: {
-                  _id: { subject: "$subject", teacherId: "$teacherId", subjectId: "$subjectId" },
-                  totalClass: { $sum: 1 }, // Count total classes
-                  attendedclass: {
-                      $sum: {
-                          $cond: [{ $in: [ObjectId(userId), "$present"] }, 1, 0]
-                      }
-                  } // Count attended classes
-              }
-          },
-          {
-              $project: {
-                  _id: 0,
-                  subject: "$_id.subject",
-                  teacherId: "$_id.teacherId",
-                  subjectId: "$_id.subjectId",
-                  sem:sem,
-                  totalClass: 1,
-                  attendedclass: 1,
-                  percentage: {
-                      $round: [{ $multiply: [{ $divide: ["$attendedclass", "$totalClass"] }, 100] }, 2]
-                  } // Calculate attendance percentage
-              }
-          }
-      ]).toArray();
-
-      return results;
-  } catch (error) {
-      console.error("Error in getSubjectWiseAttendance:", error);
-      throw error;
-  }
-
-  },
-  getDayWiseAttendance:async (userId, className,sem) =>{
-    try {
-      const attendanceCollection = await db.get().collection(collections.ATTENDANCE_COLLECTION)
-
-      const results = await attendanceCollection.aggregate([
-        {
-            $match: {
-                Class: className,
-                $or: [
-                    { present: ObjectId(userId) },
-                    { absent: ObjectId(userId) }
-                ]
-            }
-        },
-        {
-            $group: {
-                _id: {
-                    date: "$selectedDate",
-                    subject: "$subject",
-                    teacherId: "$teacherId",
-                    subjectId: "$subjectId"
-                },
-                totalClasses: { $sum: 1 }, // Count total classes per subject
-                attendedClasses: {
-                    $sum: {
-                        $cond: [{ $in: [ObjectId(userId), "$present"] }, 1, 0]
-                    }
+        const results = await attendanceCollection.aggregate([
+            {
+                $match: {
+                    sem: sem,
+                    classname: className, // ✅ Filter by class
+                    $or: [
+                        { present: { $elemMatch: { $eq: ObjectId(userId) } } },
+                        { absent: { $elemMatch: { $eq: ObjectId(userId) } } }
+                    ]
                 }
-            }
-        },
-        {
-            $group: {
-                _id: "$_id.date",
-                subjects: {
-                    $push: {
-                        subject: "$_id.subject",
-                        teacherId: "$_id.teacherId",
-                        subjectId: "$_id.subjectId",
-                        present: { $gt: ["$attendedClasses", 0] },
-                        totalClasses: "$totalClasses",
-                        attendedClasses: "$attendedClasses",
-                        percentage: {
-                            $multiply: [
-                                { $divide: ["$attendedClasses", "$totalClasses"] },
-                                100
-                            ]
+            },
+            {
+                $group: {
+                    _id: {
+                        subject: "$subject",
+                        teacherId: "$teacherId",
+                        subjectId: "$subjectId"
+                    },
+                    totalClass: { $sum: 1 }, // ✅ Count total periods for each subject
+                    attendedClass: {
+                        $sum: {
+                            $cond: [{ $in: [ObjectId(userId), "$present"] }, 1, 0]
                         }
                     }
                 }
+            },
+            {
+                $project: {
+                    _id: 0,
+                    subject: "$_id.subject",
+                    teacherId: "$_id.teacherId",
+                    subjectId: "$_id.subjectId",
+                    sem: sem,
+                    totalClass: 1,
+                    attendedClass: 1,
+                    percentage: {
+                        $round: [{ $multiply: [{ $divide: ["$attendedClass", "$totalClass"] }, 100] }, 2]
+                    } // ✅ Calculate attendance percentage
+                }
             }
-        },
-        {
-            $project: {
-                _id: 0,
-                date: "$_id",
-                subjects: 1,
-                present: { $gt: [{ $size: { $filter: { input: "$subjects", as: "s", cond: "$$s.present" } } }, 0] }
-            }
-        },
-        { $sort: { date: 1 } }
-    ]).toArray();
+        ]).toArray();
+
+        console.log(JSON.stringify(results))
+
+        return results;
+    } catch (error) {
+        console.error("Error in getSubjectWiseAttendance:", error);
+        throw error;
+    }
+},
+
+  getDayWiseAttendance: async (userId, className, sem) => {
+    try {
+        const attendanceCollection = await db.get().collection(collections.ATTENDANCE_COLLECTION);
+
+        const results = await attendanceCollection.aggregate([
+            {
+                $match: {
+                    classname: className, // ✅ Match class
+                    sem: sem,            // ✅ Match semester
+                    $or: [
+                        { present: ObjectId(userId) },
+                        { absent: ObjectId(userId) }
+                    ]
+                }
+            },
+            {
+                $group: {
+                    _id: {
+                        date: "$selectedDate",
+                        period: "$period",
+                        subject: "$subject",
+                        teacherId: "$teacherId",
+                        subjectId: "$subjectId"
+                    },
+                    totalClasses: { $sum: 1 }, // ✅ Count total occurrences per period
+                    attendedClasses: {
+                        $sum: {
+                            $cond: [{ $in: [ObjectId(userId), "$present"] }, 1, 0]
+                        }
+                    }
+                }
+            },
+            {
+                $group: {
+                    _id: "$_id.date", // ✅ Group by date
+                    subjects: {
+                        $push: {
+                            subject: "$_id.subject",
+                            teacherId: "$_id.teacherId",
+                            subjectId: "$_id.subjectId",
+                            period: "$_id.period",
+                            present: { $gt: ["$attendedClasses", 0] },
+                            totalClasses: "$totalClasses",
+                            attendedClasses: "$attendedClasses",
+                            percentage: {
+                                $multiply: [
+                                    { $divide: ["$attendedClasses", "$totalClasses"] },
+                                    100
+                                ]
+                            }
+                        }
+                    }
+                }
+            },
+            {
+                $project: {
+                    _id: 0,
+                    date: "$_id",
+                    subjects: {
+                      $sortArray: {
+                          input: "$subjects",
+                          sortBy: { period: 1 }
+                      }
+                  },
+                    present: {
+                        $gt: [
+                            { $size: { $filter: { input: "$subjects", as: "s", cond: "$$s.present" } } },
+                            0
+                        ]
+                    }
+                }
+            },
+            { $sort: { date: 1 } } // ✅ Sort by date
+        ]).toArray();
+        
+        console.log(JSON.stringify(results),"llklkj")
+        return results;
+    } catch (error) {
+        console.error("Error in getDayWiseAttendance:", error);
+        throw error;
+    }
+},
 
 
-      return results;
-  } catch (error) {
-      console.error("Error in getSubjectWiseAttendance:", error);
-      throw error;
-  }
 
-  },
   getnotificationById: (userId) => {
     return new Promise(async (resolve, reject) => {
       try {

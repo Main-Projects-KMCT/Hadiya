@@ -67,33 +67,33 @@ router.get("/", verifySignedIn, async function (req, res, next) {
 
 
 
-router.post("/submit-attendance", function (req, res) {
-  console.log(req.body); // Log the entire request body for debugging
+// router.post("/submit-attendance", function (req, res) {
+//   console.log(req.body); // Log the entire request body for debugging
 
-  const attendance = {
-    date: req.body.date,
-    selectedDate: req.body.selectedDate,
-    period: req.body.period,
-    Class: req.body.Class,
-    sem:req.body.sem,
+//   const attendance = {
+//     date: req.body.date,
+//     selectedDate: req.body.selectedDate,
+//     period: req.body.period,
+//     Class: req.body.Class,
+//     sem:req.body.sem,
 
-    teacherId: req.body.teacherId,
-    subjectId: req.body.subjectId,
-    subject: req.body.subject,
+//     teacherId: req.body.teacherId,
+//     subjectId: req.body.subjectId,
+//     subject: req.body.subject,
 
-    present: req.body.present || [],
-    absent: req.body.absent || [],
+//     present: req.body.present || [],
+//     absent: req.body.absent || [],
 
-  };
+//   };
 
-  teacherHelper.addattendance(attendance, (id) => {
-    if (id) {
-      res.redirect("/teacher");
-    } else {
-      res.status(500).send("Error adding attendance");
-    }
-  });
-});
+//   teacherHelper.addattendance(attendance, (id) => {
+//     if (id) {
+//       res.redirect("/teacher");
+//     } else {
+//       res.status(500).send("Error adding attendance");
+//     }
+//   });
+// });
 
 
 
@@ -141,47 +141,154 @@ router.get("/timetables", verifySignedIn, async function (req, res) {
 //////ALL attendance/////////////////////                                         
 router.get("/attendance", verifySignedIn, async function (req, res) {
   let teacher = req.session.teacher;
+  let tId = teacher._id.toString(); // Convert ObjectId to string for comparison
+
   try {
-    // ✅ Fetch teacher details along with the subject details using `$lookup`
-    let teacherDetails = await db.get()
-      .collection(collections.TEACHER_COLLECTION)
-      .aggregate([
-        {
-          $match: { _id: new ObjectId(teacher._id) } // ✅ Match the logged-in teacher
-        },
-        {
-          $lookup: {
-            from: collections.SUBJECT_COLLECTION, // ✅ Join with SUBJECT_COLLECTION
-            localField: "subject", // ✅ Match teacher's `subject` field
-            foreignField: "_id", // ✅ Match `_id` from SUBJECT_COLLECTION
-            as: "subjectDetails" // ✅ Store result as `subjectDetails`
-          }
-        },
-        {
-          $unwind: {
-            path: "$subjectDetails", // ✅ Extract subject details (if exists)
-            preserveNullAndEmptyArrays: true // ✅ Allow teachers with no subjects
-          }
-        }
-      ])
-      .toArray();
+      let periods = await db.get()
+          .collection(collections.TIMETABLE_COLLECTION)
+          .aggregate([
+              {
+                  $match: { 
+                      day: { $in: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"] } 
+                  }
+              },
+              {
+                  $project: {
+                      day: 1,
+                      class: 1,
+                      periods: [
+                          { period: "Period 1", value: "$period1" },
+                          { period: "Period 2", value: "$period2" },
+                          { period: "Period 3", value: "$period3" },
+                          { period: "Period 4", value: "$period4" },
+                          { period: "Period 5", value: "$period5" },
+                          { period: "Period 6", value: "$period6" }
+                      ]
+                  }
+              },
+              { $unwind: "$periods" }, // ✅ Unwind periods array
+              {
+                  $addFields: {
+                      "periods.teacherId": { $arrayElemAt: [{ $split: ["$periods.value", "|"] }, 0] },
+                      "periods.subjectId": { $arrayElemAt: [{ $split: ["$periods.value", "|"] }, 1] }
+                  }
+              },
+              { 
+                  $match: { "periods.teacherId": tId } // ✅ Filter only periods where teacherId matches tId
+              },
+              { 
+                  $addFields: { 
+                      "periods.subjectId": { $toObjectId: "$periods.subjectId" } // ✅ Convert subjectId to ObjectId
+                  } 
+              },
+              {
+                  $lookup: {
+                      from: collections.SUBJECT_COLLECTION,
+                      localField: "periods.subjectId",
+                      foreignField: "_id",
+                      as: "subjectDetails"
+                  }
+              },
+              {
+                  $project: {
+                      day: 1,
+                      class: 1,
+                      "periods.period": 1,
+                      "periods.subject": { 
+                          $arrayElemAt: ["$subjectDetails.sname", 0] // ✅ Get subject.sname instead of name
+                      },
+                      "periods.class": "$class"
+                  }
+              },
+              {
+                  $group: {
+                      _id: { day: "$day", class: "$class" },
+                      periods: { $push: { period: "$periods.period", subject: "$periods.subject", class: "$periods.class" } }
+                  }
+              },
+              {
+                  $group: {
+                      _id: "$_id.day",
+                      classes: {
+                          $push: {
+                              class: "$_id.class",
+                              periods: "$periods"
+                          }
+                      }
+                  }
+              },
+              { $sort: { "_id": 1 } }, // ✅ Sort by day order (Monday-Saturday)
+              { $project: { _id: 0, day: "$_id", classes: 1 } }
+          ])
+          .toArray();
 
-    if (teacherDetails.length > 0) {
-      teacher = teacherDetails[0]; // ✅ Set the full teacher details
-    }
+      console.log(JSON.stringify(periods), "✅ Teacher-specific Timetable");
 
-    // ✅ Fetch all users (you can add a helper for this if it's not already present)
-    let users = await db.get()
-      .collection(collections.USERS_COLLECTION) // Assuming the collection name is USER_COLLECTION
-      .find() // Get all users
-      .toArray();
-
-    res.render("teacher/attendance", { teacher: true, layout: "teacher", teacher, users });
+      res.render("teacher/class-list-attendance", { teacher: true, layout: "teacher", periods });
   } catch (error) {
-    console.error("Error fetching teacher details:", error);
-    res.redirect("/signin");
+      console.error("Error fetching attendance details:", error);
+      res.redirect("/teacher/signin");
   }
 });
+
+
+
+
+
+
+
+
+
+
+
+
+
+// console.log(timetable,"loooooooo")
+// res.render("teacher/class-list-attendance", { teacher: true, layout: "teacher", teacher, timetable });
+
+// router.get("/attendance", verifySignedIn, async function (req, res) {
+//   let teacher = req.session.teacher;
+//   try {
+//     // ✅ Fetch teacher details along with the subject details using `$lookup`
+//     let teacherDetails = await db.get()
+//       .collection(collections.TEACHER_COLLECTION)
+//       .aggregate([
+//         {
+//           $match: { _id: new ObjectId(teacher._id) } // ✅ Match the logged-in teacher
+//         },
+//         {
+//           $lookup: {
+//             from: collections.SUBJECT_COLLECTION, // ✅ Join with SUBJECT_COLLECTION
+//             localField: "subject", // ✅ Match teacher's `subject` field
+//             foreignField: "_id", // ✅ Match `_id` from SUBJECT_COLLECTION
+//             as: "subjectDetails" // ✅ Store result as `subjectDetails`
+//           }
+//         },
+//         {
+//           $unwind: {
+//             path: "$subjectDetails", // ✅ Extract subject details (if exists)
+//             preserveNullAndEmptyArrays: true // ✅ Allow teachers with no subjects
+//           }
+//         }
+//       ])
+//       .toArray();
+
+//     if (teacherDetails.length > 0) {
+//       teacher = teacherDetails[0]; // ✅ Set the full teacher details
+//     }
+
+//     // ✅ Fetch all users (you can add a helper for this if it's not already present)
+//     let users = await db.get()
+//       .collection(collections.USERS_COLLECTION) // Assuming the collection name is USER_COLLECTION
+//       .find() // Get all users
+//       .toArray();
+
+//     res.render("teacher/attendance", { teacher: true, layout: "teacher", teacher, users });
+//   } catch (error) {
+//     console.error("Error fetching teacher details:", error);
+//     res.redirect("/signin");
+//   }
+// });
 
 
 
@@ -206,8 +313,144 @@ router.post("/attendance", function (req, res) {
   });
 });
 
+router.get("/take-attendance/:day/:cls/:period/:subject", verifySignedIn, async function (req, res) {
+  let { day, cls, period, subject } = req.params;
+
+  console.log("jjjjjjjj",day, cls, period, subject)
+
+  try {
+      // Fetch students belonging to the given class
+      let students = await db.get()
+          .collection(collections.USERS_COLLECTION)
+          .find({ classname: cls })
+          .toArray();
+
+      res.render("teacher/take-attendance", { 
+          teacher: true, 
+          layout: "teacher",
+          day,
+          cls,
+          period,
+          subject,
+          students 
+      });
+  } catch (error) {
+      console.error("Error fetching student list:", error);
+      res.redirect("/teacher/attendance");
+  }
+});
+
+router.post("/submit-attendance", verifySignedIn, async function (req, res) {
+  let { day, cls, period, subject, selectedDate, sem } = req.body;
+
+  console.log(req.body,"iiuiuu")
+
+  let teacherId = req.session.teacher._id; // Get logged-in teacher ID
+
+  try {
+      // Fetch subject ID based on subject name
+      let subjectDoc = await db.get().collection(collections.SUBJECT_COLLECTION).findOne({ sname: subject });
+      if (!subjectDoc) {
+          console.error("Subject not found:", subject);
+          return res.redirect("/teacher/attendance");
+      }
+
+      let subjectId = subjectDoc._id;
+
+      let presentStudents = req.body["present[]"];
+      if (!presentStudents) {
+          presentStudents = []; // No one marked present
+      } else if (!Array.isArray(presentStudents)) {
+          presentStudents = [presentStudents]; // Convert single value to array
+      }
+
+      let presentIds = presentStudents.map(id => new ObjectId(id));
+
+      // Fetch all students in the class
+      let studentIds = await db.get().collection(collections.USERS_COLLECTION)
+          .find({ classname: cls }, { projection: { _id: 1 } })
+          .toArray();
+
+      studentIds = studentIds.map(s => s._id.toString()); // Convert to string for comparison
+
+      // Determine absent students (those not in present list)
+      let absentIds = studentIds
+          .filter(id => !presentStudents.includes(id)) // Students NOT in present
+          .map(id => new ObjectId(id));
 
 
+
+      // Save attendance to DB
+      await db.get().collection(collections.ATTENDANCE_COLLECTION).insertOne({
+          date: new Date(), // Created date
+          selectedDate: selectedDate || new Date().toISOString().split("T")[0], // Chosen date
+          day,
+          period,
+          classname:cls,
+          sem,
+          teacherId: new ObjectId(teacherId),
+          subjectId: new ObjectId(subjectId),
+          subject,
+          present:presentIds,
+          absent:absentIds
+      });
+
+      res.redirect(`/teacher/view-attendance/${selectedDate}/${cls}/${period}`); // Redirect after saving
+  } catch (error) {
+      console.error("Error submitting attendance:", error);
+      res.redirect("/teacher/attendance");
+  }
+});
+
+
+router.get("/view-attendance/:selectedDate/:classname/:period", verifySignedIn, async function (req, res) {
+  let { selectedDate, classname, period } = req.params;
+
+  console.log("llll",selectedDate, classname, period )
+
+  try {
+      // Fetch attendance record
+      let attendance = await db.get().collection(collections.ATTENDANCE_COLLECTION).findOne({
+          selectedDate,
+          classname,
+          period
+      });
+
+      if (!attendance) {
+          return res.render("teacher/view-sub-attendance", {
+              teacher: true,
+              layout: "teacher",
+              error: "No attendance record found for this selection.",
+              selectedDate,
+              classname,
+              period
+          });
+      }
+
+      // Fetch student names
+      let studentIds = [...attendance.present, ...attendance.absent];
+      let students = await db.get().collection(collections.USERS_COLLECTION)
+          .find({ _id: { $in: studentIds } })
+          .toArray();
+
+      // Map students to present/absent
+      let presentStudents = students.filter(s => attendance.present.some(id => id.equals(s._id)));
+      let absentStudents = students.filter(s => attendance.absent.some(id => id.equals(s._id)));
+
+      res.render("teacher/view-sub-attendance", {
+          teacher: true,
+          layout: "teacher",
+          selectedDate,
+          classname,
+          period,
+          presentStudents,
+          absentStudents
+      });
+  } catch (error) {
+      console.error("Error fetching attendance details:", error);
+      res.redirect("/teacher/attendance");
+  }
+});
 
 
 
@@ -856,9 +1099,12 @@ router.get("/all-exam", verifySignedIn, function (req, res) {
 });
 
 
-router.get("/add-exam", verifySignedIn, function (req, res) {
+router.get("/add-exam", verifySignedIn,async function (req, res) {
   let teacher = req.session.teacher;
-  res.render("teacher/add-exam", { teacher: true, layout: "teacher", teacher });
+  let cls= await teacherHelper.getTeacherClass(teacher._id);
+  let sub=await teacherHelper.getTeacherSubject(teacher._id);
+
+  res.render("teacher/add-exam", { teacher: true, layout: "teacher", teacher,cls,sub });
 });
 
 

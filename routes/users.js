@@ -45,6 +45,20 @@ router.get("/leave", verifySignedIn, async function (req, res, next) {
   res.render("users/leave", { admin: false, leaves, user });
 
 });
+router.get("/dashboard/exam-schedule", verifySignedIn, async function (req, res, next) {
+  let user = req.session.user;
+  if (!user || !user._id) {
+    return res.status(403).send("Unauthorized");
+  }
+ userHelper.getexamById(user.classname).then((exams) => {
+    res.render("users/dashboard/exam-schedule", { admin: false,user, exams });
+  }).catch((err) => {
+    console.error("Error fetching exam:", err);
+    res.status(500).send("Internal Server Error");
+  });
+
+});
+
 
 router.post("/add-leave", function (req, res) {
   userHelper.addLeave(req.body, (id) => {
@@ -95,7 +109,7 @@ router.get("/attendance/subjectwise", verifySignedIn, async function (req, res) 
       admin: false,
       layout: 'layout',
       attendance: attendanceData,
-      user
+      user,className ,sem
     });
 
   } catch (error) {
@@ -119,7 +133,7 @@ router.get("/attendance/daywise", verifySignedIn, async function (req, res) {
       admin: false,
       layout: 'layout',
       attendance: attendanceData,
-      user
+      user,className ,sem
     });
 
   } catch (error) {

@@ -48,6 +48,16 @@ app.engine(
       json:function (context) {
         return JSON.stringify(context);
     },
+    calculateRowspan:function (classes) {
+      let rowspan = 0;
+      classes.forEach(classItem => {
+          rowspan += classItem.periods.length; // Count total periods for all classes on the same day
+      });
+      return rowspan;
+  },
+  extractSem: function (cls) {
+    return cls.split("_")[1]; // Extracts 'S1' from 'MCA_S1'
+},
     makePeriodCells: (periods) => {
       let cells = [];
       for (let i = 1; i <= 6; i++) {
