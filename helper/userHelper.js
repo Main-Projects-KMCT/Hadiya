@@ -35,6 +35,56 @@ module.exports = {
         ...applicantData 
     });
 },
+getFeesById:(cls)=>{
+  return new Promise(async (resolve, reject) => {
+        try {
+          // Fetch exams based on teacherId (converted to ObjectId)
+          const exams = await db.get()
+            .collection(collections.FEES_COLLECTION)
+            .find({ classname
+              : cls }) // Filter by logged-in userId
+            .toArray();
+  
+          resolve(exams);
+        } catch (error) {
+          reject(error);
+        }
+      });
+
+},
+getResultById:(cls,id)=>{
+  return new Promise(async (resolve, reject) => {
+        try {
+          // Fetch exams based on teacherId (converted to ObjectId)
+          const exams = await db.get()
+            .collection(collections.RESULT_COLLECTION)
+            .find({ classname : cls }) // Filter by logged-in userId
+            .toArray();
+  
+          resolve(exams);
+        } catch (error) {
+          reject(error);
+        }
+      });
+
+},
+getSurveyById:(cls,id)=>{
+  return new Promise(async (resolve, reject) => {
+        try {
+          // Fetch exams based on teacherId (converted to ObjectId)
+          const exams = await db.get()
+            .collection(collections.SURVEY_COLLECTION)
+            .find({ classname
+              : cls }) // Filter by logged-in userId
+            .toArray();
+  
+          resolve(exams);
+        } catch (error) {
+          reject(error);
+        }
+      });
+
+},
   getexamById:(cls)=>{
     return new Promise(async (resolve, reject) => {
           try {

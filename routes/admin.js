@@ -173,6 +173,53 @@ router.get('/jobs/applicants/:id', async (req, res) => {
   res.render('admin/applicants', { applicants ,admin: true, layout: "admin-layout", administator});
 });
 
+router.get("/fees", verifySignedIn,async function (req, res) {
+  let administator = req.session.admin;
+  let cls= await adminHelper.getAllClasses();
+  let deps =await adminHelper.getAllDepartments();
+  adminHelper.getAllFees().then((products) => {
+    res.render("admin/fees", { admin: true, layout: "admin-layout", products, administator,cls,deps });
+  });
+});
+
+router.get("/add-fee", verifySignedIn,async function (req, res) {
+  let administator = req.session.admin;
+  let cls= await adminHelper.getAllClasses();
+  let deps =await adminHelper.getAllDepartments();
+  // let cls= await 
+  res.render("admin/add-fee", { admin: true, layout: "admin-layout", administator,cls,deps });
+});
+
+router.post("/add-fee", function (req, res) {
+  adminHelper.addFees(req.body, (id) => {
+    res.redirect("/admin/fees");
+
+  });
+});
+
+router.get("/edit-fee/:id", verifySignedIn, async function (req, res) {
+  let administator = req.session.admin;
+  let productId = req.params.id;
+  let product = await adminHelper.getFeeDetails(productId);
+  console.log(product);
+  res.render("admin//edit-fee", { admin: true, layout: "admin-layout", product, administator });
+});
+
+router.post("/edit-fee/:id", verifySignedIn, function (req, res) {
+  let productId = req.params.id;
+  adminHelper.updateFee(productId, req.body).then(() => {
+    
+    res.redirect("/admin/fees");
+  });
+});
+
+router.get("/delete-fee/:id", verifySignedIn, function (req, res) {
+  let productId = req.params.id;
+  adminHelper.deleteFee(productId).then((response) => {
+    res.redirect("/admin/fees");
+  });
+});
+
 
 router.get("/all-products", verifySignedIn, function (req, res) {
   let administator = req.session.admin;

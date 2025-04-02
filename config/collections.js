@@ -12,6 +12,7 @@ module.exports = {
     CLASSES_COLLECTION: 'classes', // new
     DEPARTMENT_COLLECTION:"departments", //new
     JOBS_COLLECTION:"jobs",
+    FEES_COLLECTION: 'fees',
     APPLICATIONS_COLLECTION:"applications",
     ATTENDANCE_COLLECTION: 'attendance',
     TIMETABLE_COLLECTION: "time-table",
@@ -19,6 +20,8 @@ module.exports = {
     TASK_COLLECTION: "assignments",
     LEAVE_COLLECTION: "std-leave",
     TLEAVE_COLLECTION: "thr-leave",
-    EXAM_COLLECTION: "exam"
+    EXAM_COLLECTION: "exam",
+    RESULT_COLLECTION:"results",
+    SURVEY_COLLECTION:"surveys"
 
 }

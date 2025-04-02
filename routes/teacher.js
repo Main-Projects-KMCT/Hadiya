@@ -65,8 +65,63 @@ router.get("/", verifySignedIn, async function (req, res, next) {
   }
 });
 
+router.get("/all-results", verifySignedIn, function (req, res) {
+  let teacher = req.session.teacher;
+  teacherHelper.getResultById(teacher._id).then((exams) => {
+    res.render("teacher/all-results", { teacher: true, layout: "teacher", exams, teacher });
+  }).catch((err) => {
+    console.error("Error fetching exam:", err);
+    res.status(500).send("Internal Server Error");
+  });
+});
 
 
+router.get("/add-result/:id", verifySignedIn,async function (req, res) {
+  let teacher = req.session.teacher;
+  let cls= await teacherHelper.getTeacherClass(teacher._id);
+  let sub=await teacherHelper.getTeacherSubject(teacher._id);
+
+  res.render("teacher/add-exam", { teacher: true, layout: "teacher", teacher,cls,sub });
+});
+
+
+
+router.post("/add-result", function (req, res) {
+  if (req.session.signedInTeacher && req.session.teacher && req.session.teacher._id) {
+    const teacherId = req.session.teacher._id;
+
+    teacherHelper.addexam(req.body, teacherId, (examId, error) => {
+      if (error) {
+        console.log("Error adding exam:", error);
+        return res.status(500).send("Failed to add exam");
+      }
+
+      // Redirect to the all exams page after adding the exam
+      res.redirect("/teacher/all-exam");
+    });
+  } else {
+    res.redirect("/teacher/signin");
+  }
+});
+
+router.get("/delete-exam/:id", verifySignedIn, function (req, res) {
+  let examId = req.params.id;
+  teacherHelper.deleteexam(examId).then((response) => {
+    res.redirect("/teacher/all-exam");
+  });
+});
+
+
+
+router.post("/add", async (req, res) => {
+  try {
+      await resultHelpers.addResult(req.body);
+      res.redirect("/results/manage");
+  } catch (error) {
+      console.error("Error adding result:", error);
+      res.status(500).send("Failed to add result.");
+  }
+});
 // router.post("/submit-attendance", function (req, res) {
 //   console.log(req.body); // Log the entire request body for debugging
 

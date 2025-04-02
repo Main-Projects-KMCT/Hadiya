@@ -268,6 +268,30 @@ getApplicants: async (jobId) => {
         callback(data.ops[0]._id);
       });
   },
+  getAllFees: () => {
+    return new Promise(async (resolve, reject) => {
+      let products = await db
+        .get()
+        .collection(collections.FEES_COLLECTION)
+        .find()
+        .toArray();
+      resolve(products);
+      console.log(products,"feeeee")
+    });
+  },
+  addFees: (product, callback) => {
+    console.log(product);
+   
+    product.createdAt = new Date();
+
+    db.get()
+      .collection(collections.FEES_COLLECTION)
+      .insertOne(product)
+      .then((data) => {
+       // console.log(data);
+        callback(data.ops[0]._id);
+      });
+  },
 
   getAllProducts: () => {
     return new Promise(async (resolve, reject) => {
@@ -322,10 +346,10 @@ getApplicants: async (jobId) => {
     });
   },
 
-  getProductDetails: (productId) => {
+  getFeeDetails: (productId) => {
     return new Promise((resolve, reject) => {
       db.get()
-        .collection(collections.PRODUCTS_COLLECTION)
+        .collection(collections.FEES_COLLECTION)
         .findOne({ _id: objectId(productId) })
         .then((response) => {
           resolve(response);
@@ -333,10 +357,10 @@ getApplicants: async (jobId) => {
     });
   },
 
-  deleteProduct: (productId) => {
+  deleteFee: (productId) => {
     return new Promise((resolve, reject) => {
       db.get()
-        .collection(collections.PRODUCTS_COLLECTION)
+        .collection(collections.FEES_COLLECTION)
         .removeOne({ _id: objectId(productId) })
         .then((response) => {
           console.log(response);
@@ -345,10 +369,10 @@ getApplicants: async (jobId) => {
     });
   },
 
-  updateProduct: (productId, productDetails) => {
+  updateFee: (productId, productDetails) => {
     return new Promise((resolve, reject) => {
       db.get()
-        .collection(collections.PRODUCTS_COLLECTION)
+        .collection(collections.FEES_COLLECTION)
         .updateOne(
           { _id: objectId(productId) },
           {

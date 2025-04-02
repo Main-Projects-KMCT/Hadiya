@@ -59,6 +59,60 @@ router.get("/dashboard/exam-schedule", verifySignedIn, async function (req, res,
 
 });
 
+router.get("/dashboard/fee", verifySignedIn, async function (req, res, next) {
+  let user = req.session.user;
+  if (!user || !user._id) {
+    return res.status(403).send("Unauthorized");
+  }
+ userHelper.getFeesById(user.classname).then((fees) => {
+    res.render("users/dashboard/exam-fee", { admin: false,user, fees });
+  }).catch((err) => {
+    console.error("Error fetching exam:", err);
+    res.status(500).send("Internal Server Error");
+  });
+
+});
+
+router.get("/dashboard/result", verifySignedIn, async function (req, res, next) {
+  let user = req.session.user;
+  if (!user || !user._id) {
+    return res.status(403).send("Unauthorized");
+  }
+ userHelper.getResultById(user.classname,user._id).then((result) => {
+    res.render("users/dashboard/exam-results", { admin: false,user, result });
+  }).catch((err) => {
+    console.error("Error fetching exam:", err);
+    res.status(500).send("Internal Server Error");
+  });
+
+});
+
+router.get("/dashboard/survey", verifySignedIn, async function (req, res, next) {
+  let user = req.session.user;
+  if (!user || !user._id) {
+    return res.status(403).send("Unauthorized");
+  }
+ userHelper.getSurveyById(user.classname,user._id).then((result) => {
+    res.render("users/dashboard/survey", { admin: false,user, result });
+  }).catch((err) => {
+    console.error("Error fetching exam:", err);
+    res.status(500).send("Internal Server Error");
+  });
+
+});
+router.get("/dashboard/study-materials", verifySignedIn, async function (req, res, next) {
+  let user = req.session.user;
+  if (!user || !user._id) {
+    return res.status(403).send("Unauthorized");
+  }
+ userHelper.getSurveyById(user.classname,user._id).then((result) => {
+    res.render("users/dashboard/study-materials", { admin: false,user, result });
+  }).catch((err) => {
+    console.error("Error fetching exam:", err);
+    res.status(500).send("Internal Server Error");
+  });
+
+});
 
 router.post("/add-leave", function (req, res) {
   userHelper.addLeave(req.body, (id) => {

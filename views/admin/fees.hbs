@@ -1,0 +1,55 @@
+<main id="main" class="main">
+
+    <div class="pagetitle">
+        <h1>Manage Exam Fees</h1>
+        <nav>
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/admin">Dashboard</a></li>
+                <li class="breadcrumb-item">Exam Fees</li>
+                <li class="breadcrumb-item active">All-Exam Fees</li>
+            </ol>
+        </nav>
+    </div><!-- End Page Title -->
+
+    <section>
+        <div class="container mt-5">
+            <div class="row">
+                <div class="col-12">
+                    <a href="/admin/add-fee" class="btn btn-success mb-2">Add a Exam Fee</a>
+
+                </div>
+                <div class="table-responsive-md mt-2">
+                    <table class="table responsive border table-bordered">
+                        <thead class="table-dark">
+                            <tr>
+                                <th scope="col">No.</th>
+                                <th scope="col">Title</th>
+                                <th scope="col">Class</th>
+                                <th scope="col">Price</th>
+                                <th scope="col">Description</th>
+                                <th scope="col">Delete</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {{#each products}}
+                            <tr class="align-middle">
+                                <th scope="row">{{incremented @index}}</th>
+                                <td>{{this.Name}}</td>
+                                <td>{{this.classname}}</td>
+                                <td>{{this.Price}}</td>
+                                <td>{{this.Description}}</td>
+
+                                {{!-- <td><a href="/admin/edit-product/{{this._id}}" class="btn btn-primary">Edit</a>
+                                </td> --}}
+                                <td><a href="/admin/delete-product/{{this._id}}" class="btn btn-danger"
+                                        onclick="return confirm('Are You Sure to Delete {{this.Name}} ?')">Delete</a>
+                                </td>
+                            </tr>
+                            {{/each}}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
