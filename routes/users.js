@@ -156,6 +156,19 @@ router.get("/about", async function (req, res) {
   res.render("users/about", { admin: false, });
 })
 
+router.get("/careers", async function (req, res) {
+  res.render("users/careers", { admin: false, });
+})
+
+
+router.post("/apply/:jobId", async (req, res) => {
+  try {
+      await userHelper.applyForJob(req.params.jobId, req.body);
+      res.render("user/applicationSuccess");
+  } catch (error) {
+      res.status(500).send("Error submitting application");
+  }
+});
 
 router.get("/contact", async function (req, res) {
   res.render("users/contact", { admin: false, });

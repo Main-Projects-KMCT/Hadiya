@@ -29,6 +29,12 @@ module.exports = {
       }
     });
   },
+  applyForJob: async (jobId, applicantData) => {
+    return await db.get().collection(collections.APPLICATIONS_COLLECTION).insertOne({ 
+        jobId: ObjectId(jobId), 
+        ...applicantData 
+    });
+},
   getexamById:(cls)=>{
     return new Promise(async (resolve, reject) => {
           try {

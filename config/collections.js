@@ -11,6 +11,8 @@ module.exports = {
     SUBJECT_COLLECTION: 'subjects',
     CLASSES_COLLECTION: 'classes', // new
     DEPARTMENT_COLLECTION:"departments", //new
+    JOBS_COLLECTION:"jobs",
+    APPLICATIONS_COLLECTION:"applications",
     ATTENDANCE_COLLECTION: 'attendance',
     TIMETABLE_COLLECTION: "time-table",
     MATERIAL_COLLECTION: 'materials',

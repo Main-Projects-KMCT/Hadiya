@@ -148,6 +148,32 @@ router.get("/delete-all-teachers", verifySignedIn, function (req, res) {
   });
 });
 
+// Admin: Get all job postings
+router.get('jobs', async (req, res) => {
+  let administator = req.session.admin;
+  let jobs = await adminHelper.getAllJobs();
+  res.render('admin/jobs', { jobs,admin: true, layout: "admin-layout", administator  });
+});
+
+// Admin: Add job post
+router.post('/jobs/add', async (req, res) => {
+  await adminHelper.addJob(req.body);
+  res.redirect('/admin/jobs');
+});
+
+// Admin: Delete job post
+router.get('/jobs/delete/:id', async (req, res) => {
+  await adminHelper.deleteJob(req.params.id);
+  res.redirect('/admin/jobs');
+});
+// Admin: View applicants
+router.get('/jobs/applicants/:id', async (req, res) => {
+  let administator = req.session.admin;
+  let applicants = await careersHelper.getApplicants(req.params.id);
+  res.render('admin/applicants', { applicants ,admin: true, layout: "admin-layout", administator});
+});
+
+
 router.get("/all-products", verifySignedIn, function (req, res) {
   let administator = req.session.admin;
   adminHelper.getAllProducts().then((products) => {
@@ -213,6 +239,7 @@ router.get("/signout", function (req, res) {
 
 router.get("/add-product", verifySignedIn, function (req, res) {
   let administator = req.session.admin;
+  // let cls= await 
   res.render("admin/add-product", { admin: true, layout: "admin-layout", administator });
 });
 

@@ -99,6 +99,25 @@ module.exports = {
         });
     });
   },
+  getAllJobs: async () => {
+    return await db.get().collection(collections.JOBS_COLLECTION).find().toArray();
+},
+
+// Add a new job post
+addJob: async (jobData) => {
+    return await db.get().collection(collections.JOBS_COLLECTION).insertOne(jobData);
+},
+
+// Delete a job post
+deleteJob: async (jobId) => {
+    return await db.get().collection(collections.JOBS_COLLECTION).deleteOne({ _id: ObjectId(jobId) });
+},
+
+// Get applicants for a job
+getApplicants: async (jobId) => {
+    return await db.get().collection(collections.APPLICATIONS_COLLECTION).find({ jobId: ObjectId(jobId) }).toArray();
+},
+
 
   ///////ADD teacher/////////////////////                                         
   addteacher: (teacher, callback) => {
