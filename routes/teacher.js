@@ -67,13 +67,82 @@ router.get("/", verifySignedIn, async function (req, res, next) {
 
 router.get("/all-results", verifySignedIn, function (req, res) {
   let teacher = req.session.teacher;
-  teacherHelper.getResultById(teacher._id).then((exams) => {
+  teacherHelper.getexamById(teacher._id).then((exams) => {
     res.render("teacher/all-results", { teacher: true, layout: "teacher", exams, teacher });
   }).catch((err) => {
     console.error("Error fetching exam:", err);
     res.status(500).send("Internal Server Error");
   });
 });
+router.get('/publish-result/:examId', async (req, res) => {
+  const examId = req.params.examId;
+  let teacher = req.session.teacher;
+
+  try {
+      // Find the exam details
+      const exam = await db.get().collection("exams").findOne({ _id: new ObjectId(examId) });
+
+      if (!exam) {
+          return res.status(404).send("Exam not found");
+      }
+
+      // Fetch students belonging to the same class as the exam
+      const students = await db.get().collection("users").find({ classname: exam.classname }).toArray();
+
+      res.render("teacher/publish-result", { 
+          exam, 
+          students, // Pass students to the view
+          teacher: true, 
+          teacher,
+          layout: "teacher" 
+      });
+
+  } catch (error) {
+      console.error(error);
+      res.status(500).send("Error fetching result");
+  }
+});
+
+
+router.post('/publish-result/:examId', async (req, res) => {
+  let teacher = req.session.teacher;
+  const examId = req.params.examId;
+  const { results } = req.body; // Expecting an array of student results
+
+  // Calculate pass/fail based on 30% rule
+  results.forEach(student => {
+      student.status = student.mark >= 30 ? "Pass" : "Fail";
+  });
+
+  try {
+      await db.get().collection("exams").updateOne(
+          { _id: new ObjectId(examId) },
+          { 
+              $set: { isResult: "true", results } 
+          }
+      );  
+      res.redirect('/teacher/all-results');
+  } catch (error) {
+      res.status(500).send("Error publishing result");
+  }
+});
+
+router.get('/view-result/:examId', async (req, res) => {
+  const examId = req.params.examId;
+  let teacher = req.session.teacher;
+  try {
+      const exam = await db.get().collection("exams").findOne({ _id: new ObjectId(examId) });
+
+      if (!exam || exam.isResult !== "true") {
+          return res.status(404).send("Result not found");
+      }
+
+      res.render("teacher/view-result", { exam ,teacher: true, layout: "teacher", teacher });
+  } catch (error) {
+      res.status(500).send("Error fetching result");
+  }
+});
+
 
 
 router.get("/add-result/:id", verifySignedIn,async function (req, res) {
@@ -653,15 +722,19 @@ router.get("/all-materials", verifySignedIn, function (req, res) {
 });
 
 ///////ADD workspace/////////////////////                                         
-router.get("/add-material", verifySignedIn, function (req, res) {
+router.get("/add-material", verifySignedIn, async function (req, res) {
   let teacher = req.session.teacher;
-  res.render("teacher/add-material", { teacher: true, layout: "teacher", teacher });
+  let cls= await teacherHelper.getTeacherClass(teacher._id);
+  let sub=await teacherHelper.getTeacherSubjectName(teacher._id);
+  res.render("teacher/add-material", { teacher: true, layout: "teacher", teacher, cls,sub });
 });
 
 ///////ADD material/////////////////////                                         
 router.post("/add-material", function (req, res) {
   if (req.session.signedInTeacher && req.session.teacher && req.session.teacher._id) {
     const teacherId = req.session.teacher._id;
+    const docCount = Object.keys(req.files).length; 
+    req.body.docCount=docCount;
 
     teacherHelper.addmaterial(req.body, teacherId, (materialId, error) => {
       if (error) {
@@ -1106,9 +1179,12 @@ router.get("/all-tasks", verifySignedIn, function (req, res) {
 });
 
 ///////ADD workspace/////////////////////                                         
-router.get("/add-task", verifySignedIn, function (req, res) {
+router.get("/add-task", verifySignedIn, async function (req, res) {
   let teacher = req.session.teacher;
-  res.render("teacher/add-task", { teacher: true, layout: "teacher", teacher });
+  let cls= await teacherHelper.getTeacherClass(teacher._id);
+  let sub=await teacherHelper.getTeacherSubjectName(teacher._id);
+  
+  res.render("teacher/add-task", { teacher: true, layout: "teacher", teacher ,cls,sub});
 });
 
 ///////ADD task/////////////////////                                         
@@ -1157,7 +1233,7 @@ router.get("/all-exam", verifySignedIn, function (req, res) {
 router.get("/add-exam", verifySignedIn,async function (req, res) {
   let teacher = req.session.teacher;
   let cls= await teacherHelper.getTeacherClass(teacher._id);
-  let sub=await teacherHelper.getTeacherSubject(teacher._id);
+  let sub=await teacherHelper.getTeacherSubjectName(teacher._id);
 
   res.render("teacher/add-exam", { teacher: true, layout: "teacher", teacher,cls,sub });
 });

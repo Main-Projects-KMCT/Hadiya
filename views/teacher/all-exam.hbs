@@ -23,9 +23,8 @@
                                 <th data-type="date" data-format="YYYY/DD/MM">Added Date</th>
                                 <th data-type="date" data-format="YYYY/DD/MM">Exam Date</th>
                                 <th>class</th>
-
-                                <th>Chapter Details</th>
-
+                                <th>subject</th>
+                                <th>Exam Details</th>
                                 <th>Manage</th>
                                 {{!-- <th>Manage</th> --}}
                             </tr>
@@ -37,7 +36,8 @@
                                 <td>{{formatDate this.createdAt}}</td>
                                 <td>{{formatDate this.examdate}}</td>
                                 <td>{{this.classname}}</td>
-                                <td>Ch No. {{this.no}} | {{this.name}}</td>
+                                <td>{{this.subject}}</td>
+                                <td>{{this.no}}</td>
                                 <td>
                                     <a href="/teacher/delete-exam/{{this._id}}" class="btn btn-danger btn-sm">Delete</a>
 

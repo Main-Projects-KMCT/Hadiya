@@ -12,6 +12,8 @@
                             <tr>
                                 <th>No.</th>
                                 <th data-type="date" data-format="YYYY/DD/MM">Added Date</th>
+                                <th>Class</th>
+                                 <th>Subject</th>
                                 <th>Title</th>
                                 <th>Chapter No</th>
                                 <th>Desc</th>
@@ -25,24 +27,18 @@
                                 <td>{{incremented @index}}</td>
 
                                 <td>{{formatDate this.date}}</td>
+                                 <td>{{this.classname}}</td>
+                                  <td>{{this.subject}}</td>
                                 <td>{{this.name}}</td>
                                 <td>Chapter No.{{this.no}}</td>
                                 <td>{{this.desc}}</td>
                                 <td>
-                                    <a href="/images/materials/{{this._id}}-1.pdf" class="mt-2 btn btn-dark btn-sm">View
-                                        Material - 1 </a> <br>
-
-                                    <a href="/images/materials/{{this._id}}-2.pdf" class="mt-2 btn btn-dark btn-sm">View
-                                        Material - 2 </a> <br>
-
-                                    <a href="/images/materials/{{this._id}}-3.pdf" class="mt-2 btn btn-dark btn-sm">View
-                                        Material - 3 </a> <br>
-
-                                    <a href="/images/materials/{{this._id}}-4.pdf" class="mt-2 btn btn-dark btn-sm">View
-                                        Material - 4 </a> <br>
-
-                                    <a href="/images/materials/{{this._id}}-5.pdf" class="mt-2 btn btn-dark btn-sm">View
-                                        Material - 5 </a> <br>
+                                     {{#each (range 1 this.docCount)}}
+        <a href="/images/materials/{{../_id}}-{{this}}.pdf" class="mt-2 btn btn-dark btn-sm">
+            View Material - {{this}}
+        </a>
+        <br>
+    {{/each}}
 
                                 </td>
 

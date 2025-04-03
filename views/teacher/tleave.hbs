@@ -152,8 +152,11 @@
             <input type="hidden" name="status" value="requested">
 
             <br>
-            <label for="">Leave Date</label>
-            <input type="date" name="date" class="form-control" required>
+            <label for="">Leave From </label>
+            <input type="date"  id="fromdate" name="fromdate" class="form-control" required>
+            <br>
+            <label for="">Leave To</label>
+            <input type="date" id="todate" name="todate" class="form-control" required>
             <br>
             <label for="">Reason</label>
             <textarea type="text" name="Price" class="form-control" placeholder="Tell the reason..."
@@ -192,4 +195,11 @@
             modal.style.display = "none";
         }
     }
+</script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        let today = new Date().toISOString().split("T")[0];
+        document.getElementById("todate").setAttribute("min", today);
+         document.getElementById("fromdate").setAttribute("min", today);
+    });
 </script>

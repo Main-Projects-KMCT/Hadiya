@@ -442,6 +442,21 @@ module.exports = {
       }
     });
   },  
+  getTeacherSubjectName: async (teacherId) => {
+    console.log(teacherId,"nnnnnnnnnnnnnn")
+    try {
+      const subjects = await db.get().collection("subjects").find({
+          teachers: { $in: [new objectId(teacherId)] }
+      }).toArray();
+      console.log(subjects,"sssssssssssssssssssss")
+
+      return subjects.map(subject => subject.sname);
+  } catch (err) {
+      console.error("Error fetching subjects:", err);
+      return [];
+  }
+},
+
 
   ///////ADD material/////////////////////                                         
   addmaterial: (material, teacherId, callback) => {

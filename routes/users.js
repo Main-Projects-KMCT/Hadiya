@@ -464,7 +464,10 @@ router.get("/edit-profile/:id", verifySignedIn, async function (req, res) {
   let user = req.session.user;
   let userId = req.session.user._id;
   let userProfile = await userHelper.getUserDetails(userId);
-  res.render("users/edit-profile", { admin: false, userProfile, user });
+  let cls=await adminHelper.getAllDepartments();
+  let deps=await adminHelper.getAllClasses();
+
+  res.render("users/edit-profile", { admin: false, userProfile, user,cls,deps });
 });
 
 router.post("/edit-profile/:id", verifySignedIn, async function (req, res) {

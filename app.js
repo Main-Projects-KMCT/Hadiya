@@ -70,7 +70,25 @@ app.engine(
       }
       return cells;
     },
-    },
+    range: function (start, end) {
+    let result = [];
+    for (let i = start; i <= end; i++) {
+        result.push(i);
+    }
+    return result;
+},
+    
+    getUniqueSubjects: function (subjects) {
+      console.log(subjects,"lllkiijiji")
+      let allSubjects = new Set();
+      
+      subjects.forEach(classItem => {
+          classItem.subjects.forEach(subject => allSubjects.add(subject));
+      });
+  
+      return Array.from(allSubjects);
+  },
+},
   })
 );
 

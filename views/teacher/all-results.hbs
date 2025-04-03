@@ -16,13 +16,14 @@
 
                 <div class="table-responsive">
                     <!-- Table with stripped rows -->
-                    <table class="table table-bordered datatable">
+                       <table class="table table-bordered datatable">
                         <thead>
                             <tr>
                                 <th>No.</th>
                                 <th data-type="date" data-format="YYYY/DD/MM">Exam Date</th>
                                 <th>class</th>
-                                <th>Chapter Details</th>
+                                <th>subject</th>
+                                <th>Exam Details</th>
                                 <th>Manage</th>
                                 {{!-- <th>Manage</th> --}}
                             </tr>
@@ -33,9 +34,14 @@
                                 <td>{{incremented @index}}</td>
                                 <td>{{formatDate this.examdate}}</td>
                                 <td>{{this.classname}}</td>
-                                <td>Ch No. {{this.no}} | {{this.name}}</td>
+                                <td>{{this.subject}}</td>
+                                <td>{{this.no}}</td>
                                 <td>
-                                    <a href="/teacher/add-result/{{this._id}}" class="btn btn-danger btn-sm">results</a>
+                                    {{#if (eq this.isResult "true")}}
+                                    <a href="/teacher/view-result/{{this._id}}" class="btn btn-danger btn-sm">VIEW</a>
+                                    {{else}}
+                                    <a href="/teacher/publish-result/{{this._id}}" class="btn btn-danger btn-sm">PUBLISH RESULT</a>
+                                    {{/if}}
                                 </td>
 
                             </tr>

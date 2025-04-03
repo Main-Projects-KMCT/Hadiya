@@ -102,6 +102,32 @@
                                 {{/if}}
                             </div>
                         </div>
+                        <div class="form-group">
+                    <label>Department</label>
+                    <select class="form-control" name="depcode" id="department" required>
+                        <option value="" disabled selected>Select Department</option>
+                        {{#each deps}}
+                        <option value="{{this.depcode}}" {{#if (eq this.depcode ../user.depcode)}}selected{{/if}}>
+                            {{this.depname}}
+                        </option>
+                        {{/each}}
+                    </select>
+                </div>
+
+                <!-- Class Dropdown (Dynamically Changes Based on Department) -->
+                <div class="form-group">
+                    <label>Class</label>
+                    <select class="form-control" name="classname" id="classSelect" required>
+                        <option value="" disabled selected>Select Class</option>
+                        {{#each cls}}
+                        <option value="{{this.name}}" data-dep="{{this.depcode}}" 
+                            {{#if (eq this.name ../user.classname)}}selected{{/if}}>
+                            {{this.name}}
+                        </option>
+                        {{/each}}
+                    </select>
+                </div>
+
                     </div>
 
                     <button type="submit" class="btn mt-4 btn-primary">Update Profile</button>
