@@ -11,6 +11,7 @@
                 <label>Select User</label>
                 <select class="form-select" name="userId" aria-label="Default select example">
                     <option selected>Select User</option>
+                    {{!-- <option value="all">All User</option> --}}
                     {{#each users}}
                     <option value="{{this._id}}">{{this.Fname}} {{this.Lname}}</option>
                     {{/each}}

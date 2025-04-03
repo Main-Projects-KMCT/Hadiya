@@ -64,6 +64,9 @@
                         <h5>Submit Your Assignment</h5>
                         <hr>
                         {{#if user}}
+                        {{#if feedbacks }}
+                        {{else}}
+                        
                         <form action="/add-assignment" enctype="multipart/form-data" method="post" class="mb-3">
                             <input type="hidden" name="taskId" value={{task._id}}>
                             <input type="hidden" name="builderId" value={{task.builderId}}>
@@ -82,6 +85,7 @@
                                 placeholder="Write anything..."></textarea>
                             <button type="submit" class="btn btn-dark mt-3 w-100">Submit</button>
                         </form>
+                        {{/if}}
                         {{else}}
                         <a href="/signin" class="btn btn-dark">Please login to add your reviews</a>
                         {{/if}}
@@ -90,17 +94,17 @@
                         <div class="feedback-section ">
                             <h5>Assignment Status</h5>
                             <hr>
-                            {{#each feedbacks}}
+                            {{#if (eq feedbacks.status "submitted")}}
                             <div class="card p-3 shadow mb-2">
 
                                 <p>
-                                    <strong class="">{{this.username}} - </strong> Submitted on {{formatDate
-                                    this.createdAt}}<br>
+                                    <strong class=""></strong> Submitted on {{formatDate
+                                    feedbacks.createdAt}}<br>
                                 </p>
                             </div>
                             {{else}}
                             <p>Nobody Submitted The Assignment.</p>
-                            {{/each}}
+                            {{/if}}
                         </div>
                     </div>
                 </div>

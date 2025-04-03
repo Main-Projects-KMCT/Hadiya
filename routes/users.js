@@ -764,7 +764,7 @@ router.get("/view-task/:id", verifySignedIn, async function (req, res) {
   try {
     const task = await userHelper.getTaskById(taskId);
 
-    const feedbacks = await userHelper.getFeedbackByTaskId(taskId); // Fetch feedbacks for the specific task
+    const feedbacks = await userHelper.getFeedbackByTaskId(taskId,user._id); // Fetch feedbacks for the specific task
 
 
     if (!task) {
@@ -804,6 +804,7 @@ router.post("/add-assignment", async function (req, res) {
       teacherId: ObjectId(teacherId), // Convert teacher ID to ObjectId
       text: feedbackText,
       username: username,
+      status:"submitted",
       createdAt: new Date(), // Store the timestamp
       image: "", // Placeholder for image path
     };

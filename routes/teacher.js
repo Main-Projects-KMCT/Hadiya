@@ -171,6 +171,21 @@ router.get('/view-result/:examId', async (req, res) => {
   }
 });
 
+router.get('/view-task/:taskId', verifySignedIn, async (req, res) => {
+  const Id = req.params.taskId;
+  let teacher = req.session.teacher;
+  try {
+    const task = await db.get().collection(collections.FEEDBACK_COLLECTION).find({ taskId: new ObjectId(Id) }).toArray();
+    console.log( task,"exammmmmmmm")
+      
+
+      res.render("teacher/view-task", { task ,teacher: true, layout: "teacher", teacher });
+  } catch (error) {
+      res.status(500).send("Error fetching result");
+  }
+});
+
+
 
 
 router.get("/add-result/:id", verifySignedIn,async function (req, res) {
@@ -762,6 +777,7 @@ router.post("/add-material", function (req, res) {
   if (req.session.signedInTeacher && req.session.teacher && req.session.teacher._id) {
     const teacherId = req.session.teacher._id;
     const docCount = Object.keys(req.files).length; 
+    console.log(docCount,"docCountdocCountdocCountdocCountdocCountdocCount")
     req.body.docCount=docCount;
 
     teacherHelper.addmaterial(req.body, teacherId, (materialId, error) => {
@@ -776,6 +792,8 @@ router.post("/add-material", function (req, res) {
       fileFields.forEach((field, index) => {
         if (req.files && req.files[field]) { // Check if the file exists
           let file = req.files[field];
+           
+
           let filename = `${materialId}-${index + 1}.pdf`;
           let uploadPath = path.join(__dirname, "../public/images/materials/", filename);
 

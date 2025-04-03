@@ -29,9 +29,9 @@
         {{#each timetables}}
         <tr>
             <td>{{day}}</td>
-            {{#each periods}}
-                <td>{{class}}<br>{{subject}}</td>
-            {{/each}}
+             {{#each (makePeriodCells this.periods)}}
+        <td>{{{this}}}</td> 
+      {{/each}}
         </tr>
         {{/each}}
     </tbody>

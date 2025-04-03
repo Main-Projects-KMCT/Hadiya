@@ -358,6 +358,14 @@ router.get("/view-teacher/:id", verifySignedIn, function (req, res) {
   });
 });
 
+router.get("/delete-timetable/:id/:cls/:dep", verifySignedIn, function (req, res) {
+  let Id = req.params.id;
+  let cls = req.params.cls;
+  let dep = req.params.dep;
+  adminHelper.cancelTimetable(Id).then(() => {
+    res.redirect(`/admin/timetables/${cls}/${dep}`);
+  });
+});
 
 
 
@@ -367,6 +375,7 @@ router.get("/all-t-leave", verifySignedIn, function (req, res) {
     res.render("admin/leaves/all-t-leave", { admin: true, layout: "admin-layout", administator, tleaves });
   });
 });
+
 
 
 

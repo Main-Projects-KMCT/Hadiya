@@ -173,15 +173,25 @@ getSurveyById:(cls,id)=>{
       resolve(tasks);
     });
   },
+  getAlltasksId: (id) => {
+    return new Promise(async (resolve, reject) => {
+      let tasks = await db
+        .get()
+        .collection(collections.TASK_COLLECTION)
+        .find()
+        .toArray();
+      
+      resolve(tasks);
+    });
+  },
 
 
-  getFeedbackByTaskId: (taskId) => {
+  getFeedbackByTaskId: (taskId ,id) => {
     return new Promise(async (resolve, reject) => {
       try {
         const feedbacks = await db.get()
           .collection(collections.FEEDBACK_COLLECTION)
-          .find({ taskId: ObjectId(taskId) }) // Convert taskId to ObjectId
-          .toArray();
+          .findOne({ taskId: ObjectId(taskId) ,userId:ObjectId(id)}) // Convert taskId to ObjectId
 
         resolve(feedbacks);
       } catch (error) {

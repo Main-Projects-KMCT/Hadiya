@@ -637,7 +637,16 @@ getApplicants: async (jobId) => {
         });
     });
   },
-
+  cancelTimetable: (Id) => {
+    return new Promise((resolve, reject) => {
+      db.get()
+        .collection(collections.TIMETABLE_COLLECTION)
+        .removeOne({ _id: objectId(Id) })
+        .then(() => {
+          resolve();
+        });
+    });
+  },
 
   cancelOrder: (orderId) => {
     return new Promise((resolve, reject) => {

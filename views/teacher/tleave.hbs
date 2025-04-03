@@ -76,7 +76,9 @@
                                     <thead>
                                         <tr>
                                             <th>No.</th>
-                                            <th data-type="date" data-format="YYYY/DD/MM"> Date</th>
+                                            
+                                            <th data-type="date" data-format="YYYY/DD/MM">From Date</th>
+                                            <th data-type="date" data-format="YYYY/DD/MM"> To Date</th>
                                             <th>Name</th>
                                             <th>Reason</th>
                                             <th>Status</th>
@@ -90,7 +92,8 @@
                                         {{#each leaves}}
                                         <tr>
                                             <td>{{incremented @index}}</td>
-                                            <td>{{formatDate this.date}}</td>
+                                            <td>{{formatDate this.fromdate}}</td>
+                                            <td>{{formatDate this.todate}}</td>
                                             <td>
                                                 {{!-- <p class="mb-0"><b>Teacher : </b> {{this.teacherName}}</p> --}}
                                                 <p class="mb-0"><b></b> {{this.Name}}</p>
