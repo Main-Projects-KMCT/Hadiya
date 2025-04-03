@@ -52,13 +52,52 @@ getFeesById:(cls)=>{
       });
 
 },
-getResultById:(cls,id)=>{
+getResultById: (cls, userId) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      // Fetch exams with matching classname and containing results for the user
+      const exams = await db.get()
+        .collection(collections.EXAM_COLLECTION)
+        .aggregate([
+          { $match: { classname: cls, isResult: "true" } }, // Match exams in the given class
+          { 
+            $unwind: "$results" // Expand results array
+          },
+          { 
+            $match: { "results.studentId": userId } // Filter results for the specific student
+          },
+          {
+            $project: {
+              _id: 1,
+              date: 1,
+              no: 1,
+              subject: 1,
+              classname: 1,
+              "results.mark": 1,
+              "results.internal": 1,
+              "results.status": 1,
+              "results.fullmark":1,
+              createdAt: 1,
+              updatedAt:1
+            }
+          }
+        ])
+        .toArray();
+
+      resolve(exams);
+    } catch (error) {
+      reject(error);
+    }
+  });
+},
+getStudymaterialById:(cls,id)=>{
   return new Promise(async (resolve, reject) => {
         try {
           // Fetch exams based on teacherId (converted to ObjectId)
           const exams = await db.get()
-            .collection(collections.RESULT_COLLECTION)
-            .find({ classname : cls }) // Filter by logged-in userId
+            .collection(collections.MATERIAL_COLLECTION)
+            .find({ classname
+              : cls }) // Filter by logged-in userId
             .toArray();
   
           resolve(exams);

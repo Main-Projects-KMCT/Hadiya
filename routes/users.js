@@ -60,6 +60,7 @@ router.get("/dashboard/exam-schedule", verifySignedIn, async function (req, res,
 });
 
 router.get("/dashboard/fee", verifySignedIn, async function (req, res, next) {
+  console.log("dddfffffffffffffffffff")
   let user = req.session.user;
   if (!user || !user._id) {
     return res.status(403).send("Unauthorized");
@@ -73,12 +74,14 @@ router.get("/dashboard/fee", verifySignedIn, async function (req, res, next) {
 
 });
 
-router.get("/dashboard/result", verifySignedIn, async function (req, res, next) {
+router.get("/dashboard/results", verifySignedIn, async function (req, res, next) {
+  console.log("ddd")
   let user = req.session.user;
   if (!user || !user._id) {
     return res.status(403).send("Unauthorized");
   }
  userHelper.getResultById(user.classname,user._id).then((result) => {
+  console.log(JSON.stringify(result))
     res.render("users/dashboard/exam-results", { admin: false,user, result });
   }).catch((err) => {
     console.error("Error fetching exam:", err);
@@ -105,8 +108,8 @@ router.get("/dashboard/study-materials", verifySignedIn, async function (req, re
   if (!user || !user._id) {
     return res.status(403).send("Unauthorized");
   }
- userHelper.getSurveyById(user.classname,user._id).then((result) => {
-    res.render("users/dashboard/study-materials", { admin: false,user, result });
+ userHelper.getStudymaterialById(user.classname,user._id).then((materials) => {
+    res.render("users/dashboard/study-materials", { admin: false,user, materials});
   }).catch((err) => {
     console.error("Error fetching exam:", err);
     res.status(500).send("Internal Server Error");
@@ -211,18 +214,72 @@ router.get("/about", async function (req, res) {
 })
 
 router.get("/careers", async function (req, res) {
-  res.render("users/careers", { admin: false, });
+   let jobs = await adminHelper.getAllJobs();
+   console.log(jobs)
+  res.render("users/careers", { admin: false, jobs});
 })
-
-
 router.post("/apply/:jobId", async (req, res) => {
   try {
-      await userHelper.applyForJob(req.params.jobId, req.body);
-      res.render("user/applicationSuccess");
+      const jobId = req.params.jobId;
+      const uploadDir = path.join(__dirname, "../public/images/resume/");
+      if (!fs.existsSync(uploadDir)) {
+          fs.mkdirSync(uploadDir, { recursive: true });
+      }
+
+      // Prepare application data (without resumePath yet)
+      const applicationData = {
+          jobId: jobId,
+          fullName: req.body.fullName,
+          email: req.body.email,
+          phone: req.body.phone,
+          qualification:req.body.qualification,
+          experiance:req.body.experiance,
+          appliedAt: new Date(),
+         
+      };
+
+      // Insert application data to get MongoDB `_id`
+      const result = await db.get().collection(collections.APPLICATIONS_COLLECTION).insertOne(applicationData);
+      const applicationId = result.insertedId.toString(); // Get inserted ID
+
+      // Check if a file is uploaded
+      if (!req.files || !req.files.File) {
+          return res.status(400).send("Resume file is required");
+      }
+
+      let file = req.files.File;
+      let resumeFileName = `${applicationId}.pdf`; // Use _id as filename
+      let uploadPath = path.join(uploadDir, resumeFileName);
+
+      // Move file to uploads folder
+      await file.mv(uploadPath);
+
+
+      res.render("users/applicationSuccess");
   } catch (error) {
+      console.error("Error submitting application:", error);
       res.status(500).send("Error submitting application");
   }
 });
+router.get("/apply/:jobId", async (req, res) => {
+  try {
+      const jobId = req.params.jobId;
+      const job = await db.get().collection("jobs").findOne({ _id: new ObjectId(jobId) });
+
+      if (!job) {
+          return res.status(404).send("Job not found");
+      }
+
+      res.render("users/apply", { job  ,admin: false});
+  } catch (error) {
+      console.error("Error fetching job:", error);
+      res.status(500).send("Error loading application form");
+  }
+});
+
+
+
+
 
 router.get("/contact", async function (req, res) {
   res.render("users/contact", { admin: false, });

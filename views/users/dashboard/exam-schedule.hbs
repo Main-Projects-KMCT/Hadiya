@@ -29,9 +29,10 @@
                                 <th>No.</th>
                                 <th data-type="date" data-format="YYYY/DD/MM">Added Date</th>
                                 <th data-type="date" data-format="YYYY/DD/MM">Exam Date</th>
+                                <th>Teacher</th>
                                  <th>Subject</th>
 
-                                <th>Chapter Details</th>
+                                <th>Exam Details</th>
 
                             </tr>
                         </thead>
@@ -41,8 +42,9 @@
                                 <td>{{incremented @index}}</td>
                                 <td>{{formatDate this.createdAt}}</td>
                                 <td>{{formatDate this.examdate}}</td>
+                                <td>{{this.teacher}}</td>
                                 <TD>{{this.subject}}</TD>
-                                <td>Ch No. {{this.no}} | {{this.name}}</td>
+                                <td>{{this.no}} </td>
 
 
                             </tr>

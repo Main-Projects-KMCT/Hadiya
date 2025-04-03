@@ -149,7 +149,7 @@ router.get("/delete-all-teachers", verifySignedIn, function (req, res) {
 });
 
 // Admin: Get all job postings
-router.get('jobs', async (req, res) => {
+router.get('/jobs', async (req, res) => {
   let administator = req.session.admin;
   let jobs = await adminHelper.getAllJobs();
   res.render('admin/jobs', { jobs,admin: true, layout: "admin-layout", administator  });
@@ -160,6 +160,10 @@ router.post('/jobs/add', async (req, res) => {
   await adminHelper.addJob(req.body);
   res.redirect('/admin/jobs');
 });
+router.get('/jobs/add', async (req, res) => {
+  let administator = req.session.admin;
+  res.render('admin/add-jobs', { admin: true, layout: "admin-layout", administator  });
+});
 
 // Admin: Delete job post
 router.get('/jobs/delete/:id', async (req, res) => {
@@ -169,8 +173,9 @@ router.get('/jobs/delete/:id', async (req, res) => {
 // Admin: View applicants
 router.get('/jobs/applicants/:id', async (req, res) => {
   let administator = req.session.admin;
-  let applicants = await careersHelper.getApplicants(req.params.id);
-  res.render('admin/applicants', { applicants ,admin: true, layout: "admin-layout", administator});
+  let applicants = await adminHelper.getApplicants(req.params.id);
+  const job = await db.get().collection("jobs").findOne({ _id: new ObjectId(req.params.id) });
+  res.render('admin/applicants', { applicants ,admin: true,job, layout: "admin-layout", administator});
 });
 
 router.get("/fees", verifySignedIn,async function (req, res) {

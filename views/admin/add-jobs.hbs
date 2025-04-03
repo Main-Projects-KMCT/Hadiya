@@ -1,0 +1,38 @@
+
+
+<main id="main" class="main">
+
+    <div class="pagetitle">
+        <h1>Add Jobs</h1>
+        <nav>
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/admin">Dashboard</a></li>
+                <li class="breadcrumb-item">Jobs</li>
+                <li class="breadcrumb-item active">All-Jobs</li>
+            </ol>
+        </nav>
+    </div><!-- End Page Title -->
+
+    <section>
+        <div class="container mt-4">
+            <div class="row">
+                <div class="col-md-6">
+                    <form action="/admin/jobs/add" enctype="multipart/form-data" method="POST">
+                        {{!-- <input type="hidden" name="seat" class="form-control" value="100000"> --}}
+
+                        <label class="form-label" for="exampleInputText">Job Title</label>
+                                 <input type="text" class="form-control" name="title"  placeholder="Job Title" required>
+                        <label class="form-label" for="exampleInputText">Number of vacancy</label>
+                        <input type="number" class="form-control" name="vacancy"  placeholder="" required>
+                        <label for="">Description</label>
+                        <textarea name="description" id="" cols="4" class="form-control" required></textarea> 
+                        <label for="">Salary</label>
+                        <input type="text" name="salary" class="form-control" required>
+                        <button type="submit" class="btn btn-success mt-4">Submit</button>
+                    </form>
+                </div>
+            </div>
+          
+        </div>
+    </section>
+</main>

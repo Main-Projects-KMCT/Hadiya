@@ -1,52 +1,73 @@
 <style>
-    html,
-    body {
-        background-color: rgb(243, 243, 243);
-    }
+
 
     .about-img {
-        max-width: 500px;
-        height: auto;
+        max-width: 100%;
+        height: 20% !important;
         border-radius: 20px;
     }
 </style>
+<style>
+    .header {
+        background-color: #404356 !important;
+    }
+</style>
 
-<br><br>
-<div class="container-md mt-5 p-5">
-    <div class="d-flex gap-4 align-items-start">
-        <!-- Image on the left -->
-        <div class="">
-            <img src="/images/img/workspace.jpg" alt="" class="about-img">
+<main class="main pt-5">
+    <div class="container">
+        <br><br><br>
+        <div class="pagetitle">
+            <h1>Careers</h1>
+            <nav>
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/">Home</a></li>
+                    <li class="breadcrumb-item">Careers</li>
+                </ol>
+            </nav>
+        </div><!-- End Page Title -->
+
+        <section id="services" class="services section">
+            <div class="">
+            <img src="/images/img/workspace.jpg"   style="height: 20%;" alt="" class="about-img">
         </div>
 
-        <!-- Content on the right -->
-        <div class="p-2">
-            <h2>Job Openings</h2>
-            <table>
-    <tr>
-        <th>Title</th>
-        <th>Company</th>
-        <th>Location</th>
-        <th>Apply</th>
-    </tr>
-    {{#each jobs}}
-    <tr>
-        <td>{{this.title}}</td>
-        <td>{{this.company}}</td>
-        <td>{{this.location}}</td>
-        <td>
-            <a href="/apply/{{this._id}}">Apply</a>
-        </td>
-    </tr>
-    {{/each}}
-</table>
-
-
+           <div class="row">
+    <div class="col-lg-12 col-md-12" >
+        <div class="service-item position-relative">
+            <div class="p-2">
+                <h2>Job Openings</h2>
+                <div class="row">
+                    {{#each jobs}}
+             
+                    <div class="col-md-6 mb-4">
+                        <div class="card shadow-sm border-0">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between">
+                                    <h3 class="card-title">{{this.title}}</h3>
+                                    <span class="text-muted small">{{formatDate this.createdAt}}</span>
+                                </div>
+                                <p class="card-text">{{this.description}}</p>
+                                <p><strong>Vacancy:</strong> {{this.vacancy}}</p>
+                                <p><strong>Salary:</strong> {{this.salary}}</p>
+                                <div class="d-flex justify-content-between mt-3">
+                                    <a href="/apply/{{this._id}}" class="btn btn-primary">
+                                        Apply Now!
+                                    </a>
+                                    
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {{/each}}
+                </div>
+            </div>
         </div>
     </div>
-
-    
-
-
-
 </div>
+
+        </section>
+    </div>
+</main><!-- End #main -->
+
+
+

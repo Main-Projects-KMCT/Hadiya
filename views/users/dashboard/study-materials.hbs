@@ -24,29 +24,42 @@
                     <div class="card p-3 shadow">
                         <div class="table-responsive">
                             <table class="table border table-bordered">
-                               <thead>
+                               <table class="w-100 table table-bordered" id="dataTable">
                             <tr>
-                                 <th scope="col">No.</th>
-                                 <th data-type="date" data-format="YYYY/DD/MM">Added Date</th>
-                                <th scope="col">Title</th>
-                                <th scope="col">Class</th>
-                                <th scope="col">Amount</th>
-                                <th scope="col">Description</th>
+                                <th>No.</th>
+                                <th data-type="date" data-format="YYYY/DD/MM">Added Date</th>
+                                <th>Class</th>
+                                 <th>Subject</th>
+                                <th>Title</th>
+                                <th>Chapter No</th>
+                                <th>Desc</th>
+                                <th>Study Materials</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {{#each fees}}
+                            {{#each materials}}
                             <tr>
-                                <th scope="row">{{incremented @index}}</th>
-                                <th>{{formatDate this.createdAt}}</th>
-                                <td>{{this.Name}}</td>
-                                <td>{{this.classname}}</td>
-                                <td>{{this.Price}}</td>
-                                <td>{{this.Description}}</td>
+                                <td>{{incremented @index}}</td>
+
+                                <td>{{formatDate this.date}}</td>
+                                 <td>{{this.classname}}</td>
+                                  <td>{{this.subject}}</td>
+                                <td>{{this.name}}</td>
+                                <td>Chapter No.{{this.no}}</td>
+                                <td>{{this.desc}}</td>
+                                <td>
+                                     {{#each (range 1 this.docCount)}}
+        <a href="/images/materials/{{../_id}}-{{this}}.pdf" class="mt-2 btn btn-dark btn-sm">
+            View Material - {{this}}
+        </a>
+        <br>
+    {{/each}}
+
+                                </td>
                             </tr>
                             {{/each}}
                         </tbody>
-                            </table>
+                    </table>
                         </div>
                     </div>
 

@@ -1,20 +1,24 @@
 <form action="/teacher/publish-result/{{exam._id}}" method="POST">
+ <h4 class="mt-3 mb-3"> Publish Result of {{exam.subject}} {{exam.classname}} {{exam.no}}<h4>
+
     <table class="table">
         <thead>
             <tr>
                 <th>Student Name</th>
                 <th>Mark</th>
+                <th>Full Mark</th>
                 <th>Internal Mark (out of 10)</th>
             </tr>
         </thead>
         <tbody>
             {{#each students}}
             <tr>
-                <td>{{this.name}}</td>
-                <td><input type="number" name="results[{{@index}}][mark]" required></td>
-                <td><input type="number" name="results[{{@index}}][internal]" required max="10"></td>
+                <td>{{this.Fname}} {{this.Lname}}</td>
+                <td><input type="number" class="form-control" name="results[{{@index}}][mark]" required></td>
+                <td><input type="number" class="form-control" name="results[{{@index}}][fullmark]"  value="100" required></td>
+                <td><input type="number"  class="form-control" name="results[{{@index}}][internal]" required max="10"></td>
                 <input type="hidden" name="results[{{@index}}][studentId]" value="{{this._id}}">
-                <input type="hidden" name="results[{{@index}}][name]" value="{{this.name}}">
+                <input type="hidden" name="results[{{@index}}][name]" value="{{this.Fname}} {{this.Lname}}">
             </tr>
             {{/each}}
         </tbody>

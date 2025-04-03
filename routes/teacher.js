@@ -78,10 +78,11 @@ router.get('/publish-result/:examId', async (req, res) => {
   const examId = req.params.examId;
   let teacher = req.session.teacher;
 
+
   try {
       // Find the exam details
-      const exam = await db.get().collection("exams").findOne({ _id: new ObjectId(examId) });
-
+      const exam = await db.get().collection(collections.EXAM_COLLECTION).findOne({ _id: new ObjectId(examId) });
+      console.log(exam,"exam",examId)
       if (!exam) {
           return res.status(404).send("Exam not found");
       }
@@ -107,7 +108,22 @@ router.get('/publish-result/:examId', async (req, res) => {
 router.post('/publish-result/:examId', async (req, res) => {
   let teacher = req.session.teacher;
   const examId = req.params.examId;
-  const { results } = req.body; // Expecting an array of student results
+
+
+
+  const results = [];
+  Object.keys(req.body).forEach(key => {
+      const match = key.match(/^results\[(\d+)\]\[(.+)\]$/);
+      if (match) {
+          const index = match[1]; // Extract index (0,1,2...)
+          const field = match[2]; // Extract field name (mark, fullmark, studentId...)
+
+          if (!results[index]) results[index] = {}; // Initialize object if not present
+          results[index][field] = req.body[key]; // Assign value
+      }
+  });
+
+  console.log("Parsed Results:", results);
 
   // Calculate pass/fail based on 30% rule
   results.forEach(student => {
@@ -115,24 +131,36 @@ router.post('/publish-result/:examId', async (req, res) => {
   });
 
   try {
-      await db.get().collection("exams").updateOne(
+      const updateResult = await db.get().collection(collections.EXAM_COLLECTION).updateOne(
           { _id: new ObjectId(examId) },
-          { 
-              $set: { isResult: "true", results } 
-          }
-      );  
+          { $set: { isResult: "true", results, updatedAt: new Date()} }
+      );
+
+      // Debugging the update result
+      console.log("Update Result:", updateResult);
+
+      if (updateResult.matchedCount === 0) {
+          return res.status(404).send("Exam not found");
+      }
+
+      if (updateResult.modifiedCount === 0) {
+          return res.status(400).send("No changes made to the exam results");
+      }
+
       res.redirect('/teacher/all-results');
   } catch (error) {
+      console.error("Error updating database:", error);
       res.status(500).send("Error publishing result");
   }
 });
+
 
 router.get('/view-result/:examId', async (req, res) => {
   const examId = req.params.examId;
   let teacher = req.session.teacher;
   try {
-      const exam = await db.get().collection("exams").findOne({ _id: new ObjectId(examId) });
-
+    const exam = await db.get().collection(collections.EXAM_COLLECTION).findOne({ _id: new ObjectId(examId) });
+    console.log(exam,"exam",examId)
       if (!exam || exam.isResult !== "true") {
           return res.status(404).send("Result not found");
       }

@@ -27,22 +27,26 @@
                                <thead>
                             <tr>
                                  <th scope="col">No.</th>
-                                 <th data-type="date" data-format="YYYY/DD/MM">Added Date</th>
-                                <th scope="col">Title</th>
-                                <th scope="col">Class</th>
-                                <th scope="col">Price</th>
-                                <th scope="col">Description</th>
+                                 <th data-type="date" data-format="YYYY/DD/MM">Publish Date</th>
+                                  <th>Exam type</th>
+                                  <th>subject</th>
+                                  <th>classname</th>
+                                  <th>Mark</th>
+                                  <th>Internal Mark</th>
+                                  <th>Status</th>
                             </tr>
                         </thead>
                         <tbody>
                             {{#each result}}
                             <tr>
                                 <th scope="row">{{incremented @index}}</th>
-                                <th>{{formatDate this.createdAt}}</th>
-                                <td>{{this.Name}}</td>
+                                <th>{{formatDate this.updatedAt}}</th>
+                                <td>{{this.no}}</td>
+                                <td>{{this.subject}}</td>
                                 <td>{{this.classname}}</td>
-                                <td>{{this.Price}}</td>
-                                <td>{{this.Description}}</td>
+                                <td>{{this.results.mark}}/{{this.results.fullmark}}</td>
+                                 <td>{{this.results.internal}}</td>
+                                  <td> <span class="{{#if (eq this.results.status 'Fail')}}text-danger{{else}}text-success{{/if}}">{{this.results.status}} </td>
                                 
 
 

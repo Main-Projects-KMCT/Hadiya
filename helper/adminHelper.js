@@ -105,6 +105,7 @@ module.exports = {
 
 // Add a new job post
 addJob: async (jobData) => {
+  jobData.createdAt= new Date()
     return await db.get().collection(collections.JOBS_COLLECTION).insertOne(jobData);
 },
 
@@ -115,7 +116,7 @@ deleteJob: async (jobId) => {
 
 // Get applicants for a job
 getApplicants: async (jobId) => {
-    return await db.get().collection(collections.APPLICATIONS_COLLECTION).find({ jobId: ObjectId(jobId) }).toArray();
+    return await db.get().collection(collections.APPLICATIONS_COLLECTION).find({ jobId: jobId }).toArray();
 },
 
 
