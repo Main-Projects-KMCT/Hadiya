@@ -89,6 +89,46 @@ module.exports = {
     }
 
   },
+  getAssessmentsList:async(orderId)=>{
+    try {
+      const result = await db.get().collection(collections.SURVEYRESULT_COLLECTION).find({
+        surveyId
+        : orderId    }).toArray();
+      return result;
+    } catch (err) {
+      console.error("showrrrrr:", err);
+      throw err;
+    }
+
+  },
+  getAssessmentsListId:async(orderId)=>{
+    try {
+      const result = await db.get().collection(collections.SURVEYRESULT_COLLECTION).findOne({
+        _id
+        : objectId(orderId  )  });
+        if (result && result.questions && Array.isArray(result.questions)) {
+          result.questions.forEach((question, index) => {
+            // Check if there's an answer for this question.
+            if (result.answers && result.answers[index] !== undefined) {
+              const answerIndex = parseInt(result.answers[index], 10);
+              // Ensure that the options array exists and the answer index is valid.
+              if (Array.isArray(question.options) && question.options[answerIndex] !== undefined) {
+                question.userAnswer = question.options[answerIndex];
+              } else {
+                question.userAnswer = "No answer provided";
+              }
+            } else {
+              question.userAnswer = "No answer provided";
+            }
+          });
+        }
+      return result;
+    } catch (err) {
+      console.error("showrrrrr:", err);
+      throw err;
+    }
+
+  },
 
 
   ///////ADD task/////////////////////                                         

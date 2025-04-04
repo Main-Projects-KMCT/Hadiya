@@ -78,6 +78,14 @@ app.engine(
     }
     return result;
 },
+isUserInArray:function (doneUser, userId, options) {
+  console.log(doneUser,"donee",userId)
+  if (doneUser && doneUser.includes(userId)) {
+    return options.fn(this);  // Render the 'already submitted' block
+  } else {
+    return options.inverse(this);  // Render the 'Take Survey' block
+  }
+},
     
     getUniqueSubjects: function (subjects) {
       console.log(subjects,"lllkiijiji")

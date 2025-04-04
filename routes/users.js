@@ -119,7 +119,8 @@ router.post('/take-assesment/:id',verifySignedIn,async (req, res) => {
   let userId = req.session.user._id;
   let Id=req.params.id;
   console.log("***********^^",req.body)
-  const assessment = await userHelper.setAnswer(Id,req.body);
+  const questions= await userHelper.getAssessmentsId(Id);
+  const assessment = await userHelper.setAnswer(Id,req.body,user,questions);
   res.render("users/take-success", {
     admin: false, user, 
     assessment,

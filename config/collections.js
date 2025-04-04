@@ -22,6 +22,7 @@ module.exports = {
     TLEAVE_COLLECTION: "thr-leave",
     EXAM_COLLECTION: "exam",
     RESULT_COLLECTION:"results",
-    SURVEY_COLLECTION:"surveys"
+    SURVEY_COLLECTION:"surveys",
+    SURVEYRESULT_COLLECTION:"survey-results"
 
 }

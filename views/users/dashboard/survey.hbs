@@ -42,13 +42,11 @@
                                 <td>{{this.assessmentTitle}}</td>
                                 <td>{{this.classname}}</td>
                                 <td>{{this.subject}}</td>
-                                <td>{{#if this.isAnswered }}
-                              <button
-                                class="btn btn-success" disabled> Allready submitted</button>
-                             {{else}}
-                              <a href="/take-assesment/{{this._id}}"
-                                class="btn btn-success">Take Survey</a>
-                             {{/if}}
+                               <td> {{#isUserInArray this.doneUser ../user._id}}
+    <button class="btn btn-success" disabled>Already Submitted</button>
+  {{else}}
+    <a href="/take-assesment/{{this._id}}" class="btn btn-success">Take Survey</a>
+  {{/isUserInArray}}
                              </td>
                             </tr>
                             {{/each}}

@@ -801,6 +801,34 @@ router.get('/assessment-show/:id', verifySignedIn,async (req, res) => {
     orderId
   });
 });
+router.get('/survey-list/:id', verifySignedIn,async (req, res) => {
+  let teacher = req.session.teacher;
+  const teacherId = req.session.teacher._id;
+  let Id=req.params.id;
+
+  const surveys = await teacherHelper.getAssessmentsList(Id);
+  res.render("teacher/list-survey", {
+    teacher: true, layout: "teacher", 
+    teacher,
+    surveys,
+    Id
+  });
+});
+router.get('/survey-list-user/:id', verifySignedIn,async (req, res) => {
+  let teacher = req.session.teacher;
+  const teacherId = req.session.teacher._id;
+  let Id=req.params.id;
+
+  const assessment = await teacherHelper.getAssessmentsListId(Id);
+  console.log(assessment,Id,"sss")
+  res.render("teacher/view-survey-result", {
+    teacher: true, layout: "teacher", 
+    teacher,
+    assessment,
+    Id
+  });
+});
+
 
 // router.get("/assessment-result", verifySignedIn,async function (req, res) {
 //   let psychiatrist = req.session.psychiatrist;

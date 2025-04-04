@@ -107,7 +107,7 @@ getStudymaterialById:(cls,id)=>{
       });
 
 },
-setAnswer:async (Id,answerObj)=>{
+setAnswer:async (Id,answerObj,user,qsn)=>{
   console.log("answerObjanswerObj-",answerObj,"-answerObjanswerObj")
   let answers = [];
   Object.keys(answerObj).forEach(key => {
@@ -119,12 +119,23 @@ setAnswer:async (Id,answerObj)=>{
     }
   });
   try {
+    const upt = await db.get()
+    .collection(collections.SURVEYRESULT_COLLECTION)
+    .insertOne({
+      surveyId:Id,
+      userId:user._id,
+      username:user.Fname +' '+ user.Lname,
+      classname:user.classname,
+      questions:qsn. questions,
+      answers: answers ,
+      isAnswered:true
+      } 
+    );
     const result = await db.get()
     .collection(collections.SURVEY_COLLECTION)
     .updateOne(
-      { _id: ObjectId(Id) },
-      { $set: { answers: answers ,
-        isAnswered:true} }
+        { _id: new ObjectId(Id) },  // Ensure Id is an ObjectId
+        { $push: { doneUser: user._id } }  // Push user._id to doneUser array
     );
   return result;
       }catch (err) {

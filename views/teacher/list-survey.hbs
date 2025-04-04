@@ -12,23 +12,19 @@
                             <tr>
                                 
                                  <th scope="col">No.</th>
-                                 <th data-type="date" data-format="YYYY/DD/MM">Added Date</th>
-                                <th scope="col">Title</th>
-                                <th scope="col">Class</th>
-                                <th scope="col">Subject</th>
-                                <th scope="col">Action</th>
+                               <th>Username</th>
+      <th>Class Name</th>
+      <th>view</th>
                             
                             </tr>
                         </thead>
                         <tbody>
-                            {{#each materials}}
+                            {{#each surveys}}
                             <tr>
                                 <td>{{incremented @index}}</td>
-                                
-                                <th>{{formatDate this.createdAt}}</th>
-                                <td>{{this.assessmentTitle}}</td>
-                                <td>{{this.classname}}</td>
-                                <td>{{this.subject}}</td>
+     
+      <td>{{this.username}}</td>
+      <td>{{this.classname}}</td>
                                 
 
                               
@@ -37,13 +33,10 @@
 
                                 <td>
                                     <div class="d-flex gap-2">
-                                        <a href="/teacher/assessment-show/{{this._id}}"
-                                            class="btn btn-dark btn-sm">view</a>
-                                            <a href="/teacher/survey-list/{{this._id}}"
+                                        
+                                            <a href="/teacher/survey-list-user/{{this._id}}"
                                             class="btn btn-dark btn-sm">View Results</a>
-                                        <a href="/teacher/delete-survey/{{this._id}}" class="btn btn-danger btn-sm">
-                                            Delete
-                                        </a>
+                                      
                                     </div>
                                 </td>
                             </tr>
