@@ -107,6 +107,32 @@ getStudymaterialById:(cls,id)=>{
       });
 
 },
+setAnswer:async (Id,answerObj)=>{
+  console.log("answerObjanswerObj-",answerObj,"-answerObjanswerObj")
+  let answers = [];
+  Object.keys(answerObj).forEach(key => {
+    // Use regex to extract the numeric index from keys like "answers[0]"
+    const match = key.match(/^answers\[(\d+)\]$/);
+    if (match) {
+      const idx = parseInt(match[1], 10);
+      answers[idx] = answerObj[key];
+    }
+  });
+  try {
+    const result = await db.get()
+    .collection(collections.SURVEY_COLLECTION)
+    .updateOne(
+      { _id: ObjectId(Id) },
+      { $set: { answers: answers ,
+        isAnswered:true} }
+    );
+  return result;
+      }catch (err) {
+        console.error("Error saving assessment:", err);
+        throw err;
+      }
+
+},
 getSurveyById:(cls,id)=>{
   return new Promise(async (resolve, reject) => {
         try {
@@ -123,6 +149,16 @@ getSurveyById:(cls,id)=>{
         }
       });
 
+},
+getAssessmentsId: async(Id)=> {
+  
+  try {
+    const result = await db.get().collection(collections.SURVEY_COLLECTION).findOne({_id:objectId(Id)      });
+    return result;
+  } catch (err) {
+    console.error("Error saving assessment:", err);
+    throw err;
+  }
 },
   getexamById:(cls)=>{
     return new Promise(async (resolve, reject) => {

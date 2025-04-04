@@ -1,0 +1,222 @@
+<div class="page-content-wrapper main-content">
+    <div class="container-md">
+        <h4 class="mt-3 mb-3">Add Your Survey</h4>
+        <form id="assessmentForm" >
+            <input type="hidden" name="date" id="datetime">
+            {{#if teacher}}
+            <input type="hidden" value={{teacher.Name}} name="teacher">
+            {{/if}}
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="form-group w-100">
+                                <label class="form-label" for="exampleInputText">Class</label>
+                                 <select class="form-select form-control" name="classname" id="classname" aria-label="Default select example">
+                                    <option selected disabled>Select</option>
+                                    {{#each cls}}
+                                    <option value="{{this.className}}">{{this.className}}</option>
+                                    {{/each}}
+                                </select>
+                                <label class="form-label" for="exampleInputText">Subject</label>
+                               <select class="form-select form-control" name="subject" id="subject" aria-label="Select subject">
+                                    <option selected disabled>Select</option>
+                                    {{#each sub}}
+                                        <option value="{{this}}">{{this}}</option>
+                                    {{/each}}
+                                </select>
+
+                                <div class="mb-3">
+        <label for="assessmentTitle" class="form-label">Assessment Title</label>
+        <input type="text" class="form-control" id="assessmentTitle" name="assessmentTitle" required>
+      </div>
+      <!-- Container where questions will be added dynamically -->
+      <div id="questionsContainer"></div>
+      <button type="button" id="addQuestionBtn" class="btn btn-secondary mb-3">Add Question</button>
+      <br>
+                               
+                        </div>
+                    </div>
+                </div>
+           
+
+            </div>
+            <button type="submit" class="btn btn-dark mt-4">Add Material</button>
+        </form>
+
+    </div>
+</div>
+
+<script>
+    // Get current date and time
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = (now.getMonth() + 1).toString().padStart(2, '0');
+    const day = now.getDate().toString().padStart(2, '0');
+    const hours = ((now.getHours() + 11) % 12 + 1).toString().padStart(2, '0'); // Convert to 12-hour format
+    const minutes = now.getMinutes().toString().padStart(2, '0');
+    const ampm = now.getHours() >= 12 ? 'PM' : 'AM';
+
+    // Set default value to current date and time in 12-hour format with AM/PM
+    const defaultDateTime = `${year}-${month}-${day}T${hours}:${minutes}`;
+    document.getElementById('datetime').value = defaultDateTime;
+</script>
+
+<script>
+    ClassicEditor
+        .create(document.querySelector('#editor'))
+        .catch(error => {
+            console.error(error);
+        });
+</script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      let questionIndex = 0;
+      const questionsContainer = document.getElementById('questionsContainer');
+      const addQuestionBtn = document.getElementById('addQuestionBtn');
+
+      // Function to add a new question block
+      function addQuestion() {
+        const questionBlock = document.createElement('div');
+        questionBlock.className = 'question-block';
+        questionBlock.setAttribute('data-index', questionIndex);
+        questionBlock.setAttribute('data-option-index', 0); // to track the number of options for this question
+
+        // Create a header for the question
+        const header = document.createElement('h5');
+        header.textContent = 'Question ' + (questionIndex + 1);
+        questionBlock.appendChild(header);
+
+        // Input for question text
+        const questionInput = document.createElement('input');
+        questionInput.type = 'text';
+        questionInput.name = `questions[${questionIndex}][questionText]`;
+        questionInput.className = 'form-control mb-3';
+        questionInput.placeholder = 'Enter question text';
+        questionInput.required = true;
+        questionBlock.appendChild(questionInput);
+
+        // Container for answer options
+        const optionsContainer = document.createElement('div');
+        optionsContainer.className = 'options-container';
+        questionBlock.appendChild(optionsContainer);
+
+        // Button to add an option for this question
+        const addOptionBtn = document.createElement('button');
+        addOptionBtn.type = 'button';
+        addOptionBtn.className = 'btn btn-sm btn-outline-secondary mb-3';
+        addOptionBtn.textContent = 'Add Option';
+        addOptionBtn.addEventListener('click', function() {
+          addOption(questionBlock);
+        });
+        questionBlock.appendChild(addOptionBtn);
+
+        // Append this question block to the questions container
+        questionsContainer.appendChild(questionBlock);
+        questionIndex++;
+      }
+
+      // Function to add a new answer option within a question block
+      function addOption(questionBlock) {
+        let currentOptionIndex = parseInt(questionBlock.getAttribute('data-option-index'));
+        const questionIdx = questionBlock.getAttribute('data-index');
+
+        // Create a container for the option
+        const optionBlock = document.createElement('div');
+        optionBlock.className = 'option-block';
+
+        // Radio button to select this option as the correct answer
+       /* const radioInput = document.createElement('input');
+        radioInput.type = 'radio';
+         radioInput.class = 'form-control mb-1';
+        radioInput.name = `questions[${questionIdx}][correctAnswer]`;
+        radioInput.value = currentOptionIndex;
+        optionBlock.appendChild(radioInput);*/
+
+        // Text input for the answer option text
+        const optionInput = document.createElement('input');
+        optionInput.type = 'text';
+        optionInput.className = 'form-control mb-1';
+        optionInput.name = `questions[${questionIdx}][options][]`;
+        optionInput.placeholder = 'Option text';
+        optionInput.required = true;
+        optionBlock.appendChild(optionInput);
+
+        // Append the option block to the question's options container
+        questionBlock.querySelector('.options-container').appendChild(optionBlock);
+
+        // Increment and update the option index for this question
+        questionBlock.setAttribute('data-option-index', currentOptionIndex + 1);
+      }
+
+      // Initially add one question so the form isn’t empty
+      addQuestion();
+
+      // Add a new question when the "Add Question" button is clicked
+      addQuestionBtn.addEventListener('click', addQuestion);
+
+      // Handle form submission
+      const assessmentForm = document.getElementById('assessmentForm');
+      assessmentForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        // Get assessment title
+        const assessmentTitle = document.getElementById('assessmentTitle').value;
+         const classname = document.getElementById('classname').value;
+         const subject = document.getElementById('subject').value;
+        
+        // Gather all questions from the dynamic question blocks
+        const questionBlocks = document.querySelectorAll('.question-block');
+        const questions = [];
+        
+        questionBlocks.forEach(block => {
+          // Get the question text
+          const questionText = block.querySelector('input[name^="questions"]').value;
+          // Get all option text inputs
+          const optionInputs = block.querySelectorAll('.option-block input[type="text"]');
+          const options = [];
+          optionInputs.forEach(opt => {
+            options.push(opt.value);
+          });
+          // Determine the selected correct answer (if any)
+         // const correctRadio = block.querySelector('.option-block input[type="radio"]:checked');
+         // let correctAnswer = null;
+         // if (correctRadio) {
+          //  correctAnswer = parseInt(correctRadio.value, 10);
+         // }
+          questions.push({
+            questionText: questionText,
+            options: options
+          });
+        });
+
+        // Build the final payload
+        const payload = {
+            classname:classname,
+            subject:subject,
+          assessmentTitle: assessmentTitle,
+          questions: questions,
+          teacherId:'{{teacherId}}'
+        };
+
+        // Send the POST request with the payload as JSON
+        fetch('/teacher/add-survey', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(payload)
+        })
+        .then(response => response.json())
+        .then(result => {
+          alert(result.message);
+          // Optionally clear or refresh the form
+          window.location.reload();
+        })
+        .catch(err => {
+          console.error('Error:', err);
+          alert('Error submitting assessment');
+        });
+      });
+    });
+  </script>

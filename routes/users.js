@@ -103,6 +103,29 @@ router.get("/dashboard/survey", verifySignedIn, async function (req, res, next) 
   });
 
 });
+router.get('/take-assesment/:id',verifySignedIn,async (req, res) => {
+  let user = req.session.user;
+  let userId = req.session.user._id;
+  let Id=req.params.id;
+  const assessment = await userHelper.getAssessmentsId(Id);
+  res.render("users/take-assessment", {
+    admin: false, user, 
+    assessment,
+    userId
+  });
+});
+router.post('/take-assesment/:id',verifySignedIn,async (req, res) => {
+  let user = req.session.user;
+  let userId = req.session.user._id;
+  let Id=req.params.id;
+  console.log("***********^^",req.body)
+  const assessment = await userHelper.setAnswer(Id,req.body);
+  res.render("users/take-success", {
+    admin: false, user, 
+    assessment,
+    userId
+  });
+});
 router.get("/dashboard/study-materials", verifySignedIn, async function (req, res, next) {
   let user = req.session.user;
   if (!user || !user._id) {
@@ -529,7 +552,7 @@ router.get("/edit-profile/:id", verifySignedIn, async function (req, res) {
 
 router.post("/edit-profile/:id", verifySignedIn, async function (req, res) {
   try {
-    const { Fname, Lname, Email, Phone, Address, District, Pincode } = req.body;
+    const { Fname, Lname, Email, Phone, Address, District, Pincode,department,classname } = req.body;
     let errors = {};
 
     // Validate first name
@@ -589,6 +612,8 @@ router.post("/edit-profile/:id", verifySignedIn, async function (req, res) {
         Address,
         District,
         Pincode,
+        classname,
+        department
       });
     }
 

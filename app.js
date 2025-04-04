@@ -70,6 +70,7 @@ app.engine(
       }
       return cells;
     },
+    addOne: (value) => parseInt(value, 10) + 1,
     range: function (start, end) {
     let result = [];
     for (let i = start; i <= end; i++) {

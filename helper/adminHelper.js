@@ -85,7 +85,19 @@ module.exports = {
     });
   },
 
-
+  deleteSurvey: (materialId) => {
+    return new Promise((resolve, reject) => {
+      db.get()
+        .collection(collections.SURVEY_COLLECTION)
+        .removeOne({
+          _id: objectId(materialId)
+        })
+        .then((response) => {
+          console.log(response);
+          resolve(response);
+        });
+    });
+  },
   deletematerial: (materialId) => {
     return new Promise((resolve, reject) => {
       db.get()

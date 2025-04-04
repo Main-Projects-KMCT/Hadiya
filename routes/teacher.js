@@ -754,6 +754,83 @@ router.get("/teacher-feedback", async function (req, res) {
   }
 });
 
+router.get("/all-survey", verifySignedIn, function (req, res) {
+  let teacher = req.session.teacher;
+ 
+  teacherHelper.getAllsurvey(req.session.teacher._id).then((materials) => {
+    res.render("teacher/all-survey", { teacher: true, layout: "teacher", materials, teacher });
+  });
+});
+
+router.get("/add-survey", verifySignedIn, async function (req, res) {
+  let teacher = req.session.teacher;
+  let teacherId=teacher.id;
+  let cls= await teacherHelper.getTeacherClass(teacher._id);
+  let sub=await teacherHelper.getTeacherSubjectName(teacher._id);
+  res.render("teacher/add-survey", { teacher: true, layout: "teacher", teacher, cls,sub,teacherId });
+});
+router.post("/add-survey",async function (req, res) {
+  if (req.session.signedInTeacher && req.session.teacher && req.session.teacher._id) {
+    const teacherId = req.session.teacher._id;
+
+    try {
+      const assessmentData = req.body;
+      console.log('Received assessment data:', assessmentData);
+  
+      // Save the assessment data to MongoDB using the helper function
+      const savedAssessment = await teacherHelper.saveAssessment(assessmentData,teacherId);
+      res.json({ success: true, message: 'Assessment saved successfully!', data: savedAssessment });
+    } catch (error) {
+      console.error('Error saving assessment:', error);
+      res.status(500).json({ success: false, message: 'Error saving assessment' });
+    }
+  }else {
+    res.redirect("/teacher/signin");
+  }
+});
+router.get('/assessment-show/:id', verifySignedIn,async (req, res) => {
+  let teacher = req.session.teacher;
+  const teacherId = req.session.teacher._id;
+  let orderId=req.params.id;
+  console.log("showwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww",orderId)
+  const assessment = await teacherHelper.getAssessmentsOrder(orderId);
+  res.render("teacher/assessment-show", {
+    teacher: true, layout: "teacher", 
+    teacher,
+    assessment,
+    orderId
+  });
+});
+
+// router.get("/assessment-result", verifySignedIn,async function (req, res) {
+//   let psychiatrist = req.session.psychiatrist;
+//   let psychiatristId = psychiatrist._id;
+
+//   // Fetch all orders for the current psychiatrist
+//   let ans= await psychiatristHelper.getAllAnsweredAssesement(psychiatristId);
+
+
+//   res.render("psychiatrist/assessment-result", {
+//     psychiatrist: true,
+//     layout: "layout",
+//     ans:ans,
+//     psychiatrist
+//   });
+// });
+
+// router.get('/view-assesment-result/:id',async (req, res) => {
+//   let psychiatrist = req.session.psychiatrist;
+//   let orderId=req.params.id;
+//   const assessment = await psychiatristHelper.getResult(orderId);
+//   console.log(assessment,"^^^^^^")
+//   res.render("psychiatrist/view-assesment-result", {
+//     psychiatrist: true,
+//     layout: "layout",
+//     psychiatrist,
+//     assessment,
+//     orderId
+//   });
+// });
 
 
 ///////ALL material/////////////////////                                         
@@ -830,6 +907,12 @@ router.get("/delete-material/:id", verifySignedIn, function (req, res) {
   let materialId = req.params.id;
   adminHelper.deletematerial(materialId).then((response) => {
     res.redirect("/teacher/all-materials");
+  });
+});
+router.get("/delete-survey/:id", verifySignedIn, function (req, res) {
+  let materialId = req.params.id;
+  adminHelper.deleteSurvey(materialId).then((response) => {
+    res.redirect("/teacher/all-survey");
   });
 });
 

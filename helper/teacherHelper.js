@@ -58,6 +58,37 @@ module.exports = {
         });
     });
   },
+  saveAssessment: async (data,psychiatristId,user)=> {
+    data.createdAt = new Date();
+    data.isAnswered=false;
+    try {
+      // const upt= await db.get().collection(collections.ORDER_COLLECTION).updateOne(
+      //   { _id: objectId(data.orderId) },
+      //     {
+      //       $set: {
+      //         isAssesment:true
+      //       },
+      //     }
+      // );
+      const result = await db.get().collection(collections.SURVEY_COLLECTION).insertOne(data);
+      // Attach the insertedId to the data object
+      data._id = result.insertedId;
+      return data;
+    } catch (err) {
+      console.error("Error saving assessment:", err);
+      throw err;
+    }
+  },
+  getAssessmentsOrder:async(orderId)=>{
+    try {
+      const result = await db.get().collection(collections.SURVEY_COLLECTION).findOne({_id: objectId(orderId  )  });
+      return result;
+    } catch (err) {
+      console.error("showrrrrr:", err);
+      throw err;
+    }
+
+  },
 
 
   ///////ADD task/////////////////////                                         
@@ -478,6 +509,16 @@ module.exports = {
       });
   },
 
+  getAllsurvey: (teacherId) => {
+    return new Promise(async (resolve, reject) => {
+      let materials = await db
+        .get()
+        .collection(collections.SURVEY_COLLECTION)
+        .find({ teacherId: objectId(teacherId) }) // Filter by teacherId
+        .toArray();
+      resolve(materials);
+    });
+  },
 
   ///////GET ALL material/////////////////////                                            
   getAllmaterials: (teacherId) => {

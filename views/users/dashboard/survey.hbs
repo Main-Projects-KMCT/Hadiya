@@ -30,19 +30,26 @@
                                  <th data-type="date" data-format="YYYY/DD/MM">Added Date</th>
                                 <th scope="col">Title</th>
                                 <th scope="col">Class</th>
-                                <th scope="col">Amount</th>
-                                <th scope="col">Description</th>
+                                <th scope="col">Subject</th>
+                                <th scope="col">Action</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {{#each survey}}
+                            {{#each result}}
                             <tr>
                                 <th scope="row">{{incremented @index}}</th>
                                 <th>{{formatDate this.createdAt}}</th>
-                                <td>{{this.Name}}</td>
+                                <td>{{this.assessmentTitle}}</td>
                                 <td>{{this.classname}}</td>
-                                <td>{{this.Price}}</td>
-                                <td>{{this.Description}}</td>
+                                <td>{{this.subject}}</td>
+                                <td>{{#if this.isAnswered }}
+                              <button
+                                class="btn btn-success" disabled> Allready submitted</button>
+                             {{else}}
+                              <a href="/take-assesment/{{this._id}}"
+                                class="btn btn-success">Take Survey</a>
+                             {{/if}}
+                             </td>
                             </tr>
                             {{/each}}
                         </tbody>
