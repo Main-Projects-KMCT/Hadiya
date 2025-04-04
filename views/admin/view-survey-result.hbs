@@ -1,0 +1,22 @@
+
+  <main id="main" class="main">
+  <div class="container mt-5">
+    <h1>{{assessment.username}} -{{assessment.classname}} </h1>
+    {{#if assessment}}
+      {{#each assessment.questions}}
+        <div class="card mb-3">
+          <div class="card-header">
+            {{questionText}}
+          </div>
+          <div class="card-body">
+            <p>Answer: {{userAnswer}}</p>
+          </div>
+        </div>
+      {{/each}}
+    {{else}}
+      <p>Not available.</p>
+    {{/if}}
+  </div>
+  </main>
+
+

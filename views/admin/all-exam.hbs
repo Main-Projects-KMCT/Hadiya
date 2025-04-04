@@ -1,9 +1,8 @@
-<main class="main pt-5">
+<main id="main" class="main">
 
     <div class="container">
         <div class="d-flex justify-content-between align-items-center">
             <h4 class="mt-3 mb-3">Manage Your Exams</h4>
-            <a href="/teacher/add-exam" class="btn btn-dark">+ Schedule An Exam</a>
         </div>
         <div class="card">
             <div class="card-body">
@@ -26,7 +25,6 @@
                                 <th>subject</th>
                                 <th>Exam Details</th>
                                 <th>Manage</th>
-                                {{!-- <th>Manage</th> --}}
                             </tr>
                         </thead>
                         <tbody>
@@ -38,8 +36,8 @@
                                 <td>{{this.classname}}</td>
                                 <td>{{this.subject}}</td>
                                 <td>{{this.no}}</td>
-                                <td>
-                                    <a href="/teacher/delete-exam/{{this._id}}" class="btn btn-danger btn-sm">Delete</a>
+                                 <td>
+                                    <a href="/admin/delete-exam/{{this._id}}" class="btn btn-danger btn-sm">Delete</a>
 
                                 </td>
 
