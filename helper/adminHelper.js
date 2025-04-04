@@ -1017,7 +1017,7 @@ getApplicants: async (jobId) => {
       { $project: { _id: 0, day: "$_id", periods: 1 } }
     ]).toArray();
 
-    console.log(timetable[0].periods,"ssssssssutttttttt")
+   // console.log(timetable[0].periods,"ssssssssutttttttt")
 
     return timetable;
 },

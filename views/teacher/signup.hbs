@@ -4,25 +4,26 @@
         margin-top: 5px;
     }
 
-    label {
-        font-size: 13px;
-        margin-bottom: 10px;
+    .custom-container {
+        margin-left: auto;
+        margin-right: auto;
     }
 </style>
 
-<body class="bg-gradient-primary">
+<body class="bg-gradient-dark">
 
     <!-- Login Wrapper Area -->
-    <div class="login-wrapper d-flex  align-items-center justify-content-center">
-        <div class="container mb-4 mt-5">
-            <!-- Register Form -->
-            <h4 class="text-center text-white mb-3" style="font-weight: 600;">ET LAB TEACHERS PORTAL<span
-                    style="color: crimson;">.</span></h4>
+   <div class="login-wrapper d-flex  align-items-center justify-content-center">
+        <div class="container mb-4">
 
+            <div class="text-center px-4"><img class="login-intro-img" src="assets/img/bg-img/36.png" alt=""></div>
+            <!-- Register Form -->
+             <h4 class="text-center text-white mb-3" style="font-weight: 600;">EduLink<span
+                    style="color: rgb(249, 246, 246);">.</span></h4>
             <div class="card shadow p-4">
 
                 <div class="register-form mt-4">
-                    <h6 class="mb-4 text-center">Create New Account</h6>
+                    {{!-- <h6 class="mb-4 text-center"></h6> --}}
                     {{#if signInErr}}
 
                     <p class="text-danger text-center ">{{signInErr}}</p>
@@ -33,6 +34,7 @@
 
                         <div class="form-group">
                             <div class="">
+                                 <label for="text" class="form-label mb-8 h6">FIRST NAME</label>
                                 <div class="position-relative">
                                     <input class="form-control py-11 ps-40" id="name" type="text" name="Name"
                                         value="{{Name}}" placeholder="Your First Name" pattern="[A-Za-z\s]+"
@@ -51,6 +53,7 @@
                         </div>
 
                         <div class="form-group mt-2">
+                             <label for="text" class="form-label mb-8 h6">EMAIL</label>
                             <div class="position-relative  ">
                                 <input class="form-control py-11 ps-40" id="email" type="email" name="Email"
                                     value="{{Email}}" placeholder="Your Email">
@@ -65,6 +68,7 @@
 
                         </div>
                         <div class="form-group">
+                             <label for="text" class="form-label mb-8 h6">PHONE NO</label>
                             <div class="position-relative  mb-3">
                                 <input class="form-control py-11 ps-40" id="mobileNumber" type="number" name="Phone"
                                     value="{{Phone}}" placeholder="Your Phone Number">
@@ -78,12 +82,14 @@
 
                         </div>
                         <div class="form-group">
+                             <label for="text" class="form-label mb-8 h6">ADDRESS</label>
                             <textarea class="form-control" name="Address"
                                 placeholder="Your Address">{{Address}}</textarea>
                             {{#if errors.address}}<div class="text-danger">{{errors.address}}</div>{{/if}}
                         </div>
                         <div class="row g-1">
                             <div class="col-lg-7">
+                                 <label for="text" class="form-label mb-8 h6">CITY</label>
                                 <div class="form-group">
                                     <input class="form-control" type="text" name="City" value="{{City}}"
                                         placeholder="Your City Name" pattern="[A-Za-z]+"
@@ -92,6 +98,7 @@
                                 </div>
                             </div>
                             <div class="col-lg-5">
+                                 <label for="text" class="form-label mb-8 h6">PIN CODE</label>
                                 <div class="form-group">
                                     <input class="form-control" type="number" name="Pincode" value="{{Pincode}}"
                                         placeholder="Your Pincode">
@@ -101,7 +108,7 @@
                         </div>
                          <div class="row g-1">
                                 <div class="col-lg-6">
-                                <label for="current-password" class="form-label mb-8 h6"> Select Department</label>
+                                <label for="current-password" class="form-label mb-8 h6">SELECT DEPARTMNET</label>
                             <select class="form-control" name="depcode" id="departmentSelect" required>
                             <option value="">-- Select Department --</option>
                             {{#each deps}}
@@ -110,10 +117,10 @@
                         </select>
                             </div>
                                     <div class="col-lg-6">
-                                <label for="current-password" class="form-label mb-8 h6"> Select Role</label>
+                                <label for="current-password" class="form-label mb-8 h6">SELECT ROLE</label>
                             <select class="form-control" name="role" id="roleSelect" required>
                             <option value="">-- Select Role --</option>
-                            <option value="lecturer">lecturer</option>
+                            <option value="lecturer">LECTURE</option>
                              <option value="HOD">HOD</option>
 
                         </select>
@@ -121,6 +128,7 @@
                             </div>
                         </div>
                         <div class="form-group position-relative">
+                             <label for="text" class="form-label mb-8 h6">PASSWORD</label>
                             <div class="position-relative">
                                 <input class="form-control py-11 ps-40" id="current-password" name="Password"
                                     value="{{Password}}" type="password" placeholder="Enter Password" required

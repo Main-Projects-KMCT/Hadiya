@@ -554,6 +554,7 @@ router.post("/edit-profile/:id", verifySignedIn, async function (req, res) {
   try {
     const { Fname, Lname, Email, Phone, Address, District, Pincode,department,classname } = req.body;
     let errors = {};
+    console.log(req.body,"proffffffffffffffffff")
 
     // Validate first name
     if (!Fname || Fname.trim().length === 0) {
@@ -612,13 +613,13 @@ router.post("/edit-profile/:id", verifySignedIn, async function (req, res) {
         Address,
         District,
         Pincode,
-        classname,
-        department
+       depcode: department,
+       classname :classname
       });
     }
 
     // Update the user profile
-    await userHelper.updateUserProfile(req.params.id, req.body);
+    await userHelper.updateUserProfile(req.params.id, req.body,department,classname);
 
     // Fetch the updated user profile and update the session
     let updatedUserProfile = await userHelper.getUserDetails(req.params.id);
@@ -777,7 +778,7 @@ router.get("/timetable", verifySignedIn, async function (req, res) {
 
 router.get("/tasks", verifySignedIn, function (req, res) {
   let user = req.session.user;
-  userHelper.getAlltasks().then((tasks) => {
+  userHelper.getAlltasks(user.classname).then((tasks) => {
     res.render("users/tasks", { admin: false, tasks, user });
   });
 });

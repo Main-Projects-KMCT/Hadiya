@@ -199,12 +199,12 @@ getAssessmentsId: async(Id)=> {
 
 
 
-  getAlltasks: () => {
+  getAlltasks: (cls) => {
     return new Promise(async (resolve, reject) => {
       let tasks = await db
         .get()
         .collection(collections.TASK_COLLECTION)
-        .find()
+        .find({classname:cls})
         .toArray();
       resolve(tasks);
     });
@@ -798,7 +798,7 @@ getAssessmentsId: async(Id)=> {
     });
   },
 
-  updateUserProfile: (userId, userDetails) => {
+  updateUserProfile: (userId, userDetails,department,classname) => {
     return new Promise((resolve, reject) => {
       db.get()
         .collection(collections.USERS_COLLECTION)
@@ -813,6 +813,8 @@ getAssessmentsId: async(Id)=> {
               Address: userDetails.Address,
               District: userDetails.District,
               Pincode: userDetails.Pincode,
+              depcode: department,
+              classname :classname
             },
           }
         )

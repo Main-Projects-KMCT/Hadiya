@@ -27,7 +27,8 @@
                                 <thead>
                                     <tr>
                                         <th>No.</th>
-                                        <th data-type="date" data-format="YYYY/DD/MM">Joined Date</th>
+                                        <th data-type="date" data-format="YYYY/DD/MM">From Date</th>
+                                        <th data-type="date" data-format="YYYY/DD/MM">To Date</th>
                                         <th>Teacher Name</th>
                                         <th>Reason</th>
                                         {{!-- <th>Address</th>
@@ -39,9 +40,11 @@
                                     {{#each sleaves}}
                                     <tr>
                                         <td>{{incremented @index}}</td>
-                                        <td>{{this.date}}</td>
+                                        <td>{{this.fromdate}}</td>
+                                        <td>{{this.todate}}</td>
                                         <td>{{this.Name}}</td>
                                         <td>{{this.Price}}</td>
+                                        
                                         {{!-- <td>{{this.Address}}</td>
                                         <td>{{this.City}}</td> --}}
                                         <td>
