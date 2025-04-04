@@ -58,9 +58,10 @@ module.exports = {
         });
     });
   },
-  saveAssessment: async (data,psychiatristId,user)=> {
+  saveAssessment: async (data,Id)=> {
     data.createdAt = new Date();
     data.isAnswered=false;
+    data.teacherId=Id;
     try {
       // const upt= await db.get().collection(collections.ORDER_COLLECTION).updateOne(
       //   { _id: objectId(data.orderId) },
@@ -554,7 +555,7 @@ module.exports = {
       let materials = await db
         .get()
         .collection(collections.SURVEY_COLLECTION)
-        .find({ teacherId: objectId(teacherId) }) // Filter by teacherId
+        .find({ teacherId: teacherId }) // Filter by teacherId
         .toArray();
       resolve(materials);
     });
