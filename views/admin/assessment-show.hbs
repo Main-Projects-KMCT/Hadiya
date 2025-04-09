@@ -1,0 +1,50 @@
+
+  
+<main id="main" class="main">
+
+    <div class="pagetitle">
+        <h1>All Survey</h1>
+        <nav>
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/admin">Dashboard</a></li>
+                <li class="breadcrumb-item">Survey</li>
+                <li class="breadcrumb-item active">All Survey</li>
+            </ol>
+        </nav>
+    </div><!-- End Page Title -->
+
+    <section>
+        <div class="container mt-4">
+            
+            <div class="row">
+                <h1>{{assessment.assessmentTitle}}</h1>
+    <form action="/take/{{assessment._id}}" method="POST">
+      {{#each assessment.questions as |question qIndex|}}
+        <div class="card mb-3">
+          <div class="card-header">
+            Question {{addOne qIndex}}: {{question.questionText}}
+          </div>
+          <div class="card-body">
+            {{#each question.options as |option oIndex|}}
+              <div class="form-check">
+                <input class="form-check-input"
+                       type="radio"
+                       name="answers[{{qIndex}}]"
+                       id="q{{qIndex}}_option{{oIndex}}"
+                       value="{{oIndex}}"
+                       required>
+                <label class="form-check-label" for="q{{qIndex}}_option{{oIndex}}">
+                  {{option}}
+                </label>
+              </div>
+            {{/each}}
+          </div>
+        </div>
+        {{else}}
+    <p>Assessment/Questions are currently available now.</p>
+      {{/each}}
+      {{!-- <button type="submit" class="btn btn-success">Submit Answers</button> --}}
+    </form>
+        </div>
+    </section>
+</main>

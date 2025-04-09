@@ -225,6 +225,70 @@ router.get("/delete-fee/:id", verifySignedIn, function (req, res) {
   });
 });
 
+router.get("/all-survey", verifySignedIn, function (req, res) {
+  let administator = req.session.admin;
+  
+  adminHelper.getAllsurvey().then((materials) => {
+    res.render("admin/all-survey", { admin: true, layout: "admin-layout",administator, materials});
+  });
+});
+router.get('/assessment-show/:id', verifySignedIn,async (req, res) => {
+  let administator = req.session.admin;
+  let orderId=req.params.id;
+  const assessment = await adminHelper.getAssessmentsOrder(orderId);
+  res.render("admin/assessment-show", {
+    admin: true, layout: "admin-layout",administator,
+    assessment,
+    orderId
+  });
+});
+router.get('/survey-list/:id', verifySignedIn,async (req, res) => {
+  let administator = req.session.admin;
+  let Id=req.params.id;
+
+  const surveys = await adminHelper.getAssessmentsList(Id);
+  res.render("admin/list-survey", {
+    admin: true, layout: "admin-layout",administator, 
+    surveys,
+    Id
+  });
+});
+router.get('/survey-list-user/:id', verifySignedIn,async (req, res) => {
+  let administator = req.session.admin;
+  let Id=req.params.id;
+
+  const assessment = await adminHelper.getAssessmentsListId(Id);
+  console.log(assessment,Id,"sss")
+  res.render("admin/view-survey-result", {
+    admin: true, layout: "admin-layout",administator, 
+    assessment,
+    Id
+  });
+});
+
+
+router.get("/all-exam", verifySignedIn, function (req, res) {
+  let administator = req.session.admin;
+  adminHelper.getexamById().then((exams) => {
+    res.render("admin/all-exam", { admin: true, layout: "admin-layout",administator, exams});
+  }).catch((err) => {
+    console.error("Error fetching exam:", err);
+    res.status(500).send("Internal Server Error");
+  });
+});
+router.get("/delete-exam/:id", verifySignedIn, function (req, res) {
+  let examId = req.params.id;
+  adminHelper.deleteexam(examId).then((response) => {
+    res.redirect("/admin/all-exam");
+  });
+});
+
+router.get("/delete-survey/:id", verifySignedIn, function (req, res) {
+  let materialId = req.params.id;
+  adminHelper.deleteSurvey(materialId).then((response) => {
+    res.redirect("/admin/all-survey");
+  });
+});
 
 router.get("/all-products", verifySignedIn, function (req, res) {
   let administator = req.session.admin;
